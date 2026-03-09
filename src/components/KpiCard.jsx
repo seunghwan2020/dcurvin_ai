@@ -10,7 +10,7 @@ export default function KpiCard({ label, value, change, prefix = '', suffix = ''
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       whileHover={{ y: -2, boxShadow: '0 8px 28px rgba(196,166,97,0.08), 0 0 0 1px rgba(196,166,97,0.12)' }}
-      className="rounded-2xl border p-4 transition-all duration-300"
+      className="rounded-2xl border p-4 transition-all duration-300 gold-border-glow"
       style={{
         background: 'rgba(255,255,255,0.75)',
         backdropFilter: 'blur(20px)',

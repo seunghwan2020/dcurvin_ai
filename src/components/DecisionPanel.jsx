@@ -84,12 +84,59 @@ export default function DecisionPanel({ decision, characterColor, onDecisionMade
             ))}
           </motion.div>
         ) : (
-          <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-4">
-            <div className="text-center mb-4">
-              <motion.div initial={{ scale: 0 }} animate={{ scale: [0, 1.4, 1] }} transition={{ type: 'spring', damping: 8 }} className="text-4xl mb-3">⚡</motion.div>
+          <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-4 relative overflow-hidden">
+            {/* Skill cast radial burst */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.3 }}
+              animate={{ opacity: [0, 0.5, 0], scale: [0.3, 2, 2.5] }}
+              transition={{ duration: 1 }}
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: `radial-gradient(circle, ${characterColor}30 0%, transparent 60%)` }}
+            />
+            {/* Magic circle */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0, rotate: 0 }}
+              animate={{ opacity: [0, 0.6, 0], scale: [0, 1.5, 2], rotate: 180 }}
+              transition={{ duration: 1.5 }}
+              className="absolute left-1/2 top-8 -translate-x-1/2 w-32 h-32 rounded-full pointer-events-none"
+              style={{ border: `2px solid ${characterColor}40`, boxShadow: `0 0 30px ${characterColor}20` }}
+            />
+            {/* Sparkle particles */}
+            {Array.from({ length: 12 }).map((_, i) => {
+              const angle = (i / 12) * Math.PI * 2
+              return (
+                <motion.div key={i}
+                  className="absolute w-1 h-1 rounded-full"
+                  style={{ left: '50%', top: '40px', background: i % 2 === 0 ? '#f0d875' : characterColor }}
+                  initial={{ opacity: 1, x: 0, y: 0 }}
+                  animate={{ opacity: 0, x: Math.cos(angle) * 80, y: Math.sin(angle) * 80 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                />
+              )
+            })}
+            <div className="text-center mb-4 relative z-10">
+              <motion.div initial={{ scale: 0, rotate: -30 }} animate={{ scale: [0, 1.6, 1], rotate: [0, 15, 0] }}
+                transition={{ type: 'spring', damping: 8 }}
+                className="w-14 h-14 mx-auto mb-3 rounded-2xl flex items-center justify-center"
+                style={{
+                  background: `linear-gradient(135deg, ${characterColor} 0%, ${characterColor}cc 100%)`,
+                  boxShadow: `0 4px 20px ${characterColor}40, inset 0 1px 0 rgba(255,255,255,0.3)`,
+                }}>
+                <span className="text-2xl">⚡</span>
+              </motion.div>
               <p className="text-[13px] font-semibold text-gray-800">{selected.text}</p>
-              <motion.p initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: 'spring' }}
-                className="text-xl font-black mt-2" style={{ color: '#C4A661' }}>+{selected.exp} EXP!</motion.p>
+              {/* EXP with coin fly */}
+              <div className="relative inline-block">
+                <motion.p initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: 'spring' }}
+                  className="text-xl font-black mt-2" style={{ color: '#C4A661' }}>+{selected.exp} EXP!</motion.p>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <motion.span key={i}
+                    className="absolute text-sm animate-coin-fly"
+                    style={{ left: '50%', top: '0', animationDelay: `${i * 0.2}s` }}>
+                    🪙
+                  </motion.span>
+                ))}
+              </div>
               <p className="text-[11px] text-gray-400 mt-1">{selected.effect}</p>
             </div>
             {selected.actions && selected.actions.length > 0 && (

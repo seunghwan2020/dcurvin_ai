@@ -50,7 +50,7 @@ export default function OfficeMap() {
                 onClick={() => navigate(tc.path)}
                 whileHover={{ y: -6, boxShadow: `0 12px 40px ${char.color}18, 0 0 0 1px ${char.color}30` }}
                 whileTap={{ scale: 0.97 }}
-                className="w-full text-left p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden group"
+                className="w-full text-left p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden group gold-border-glow ripple-container"
                 style={{
                   background: 'rgba(255,255,255,0.75)',
                   backdropFilter: 'blur(24px)',
@@ -97,7 +97,7 @@ export default function OfficeMap() {
             onClick={() => navigate('/global-logistics')}
             whileHover={{ y: -6, boxShadow: '0 12px 40px rgba(196,166,97,0.15), 0 0 0 1px rgba(196,166,97,0.3)' }}
             whileTap={{ scale: 0.97 }}
-            className="w-full text-left p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden group"
+            className="w-full text-left p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden group gold-border-glow ripple-container"
             style={{
               background: 'linear-gradient(135deg, rgba(196,166,97,0.08) 0%, rgba(255,255,255,0.8) 100%)',
               backdropFilter: 'blur(24px)',
