@@ -1,100 +1,65 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export default function DialogBox({ character, messages, onComplete }) {
-  const [currentMsg, setCurrentMsg] = useState(0)
-  const [displayText, setDisplayText] = useState('')
-  const [isTyping, setIsTyping] = useState(true)
-
-  const msg = messages[currentMsg]
+export default function DialogBox({ characterName, characterColor, messages, onComplete }) {
+  const [idx, setIdx] = useState(0)
+  const [text, setText] = useState('')
+  const [typing, setTyping] = useState(true)
+  const msg = messages[idx]
 
   useEffect(() => {
-    setDisplayText('')
-    setIsTyping(true)
+    setText('')
+    setTyping(true)
     let i = 0
-    const text = msg.text
-    const timer = setInterval(() => {
+    const t = msg.text
+    const iv = setInterval(() => {
       i++
-      setDisplayText(text.slice(0, i))
-      if (i >= text.length) {
-        clearInterval(timer)
-        setIsTyping(false)
-      }
-    }, 25)
-    return () => clearInterval(timer)
-  }, [currentMsg, msg.text])
+      setText(t.slice(0, i))
+      if (i >= t.length) { clearInterval(iv); setTyping(false) }
+    }, 22)
+    return () => clearInterval(iv)
+  }, [idx, msg.text])
 
   const handleClick = () => {
-    if (isTyping) {
-      setDisplayText(msg.text)
-      setIsTyping(false)
-      return
-    }
-    if (currentMsg < messages.length - 1) {
-      setCurrentMsg(prev => prev + 1)
-    } else {
-      onComplete?.()
-    }
+    if (typing) { setText(msg.text); setTyping(false); return }
+    if (idx < messages.length - 1) setIdx(i => i + 1)
+    else onComplete?.()
   }
 
   return (
     <motion.div
-      initial={{ scale: 0.8, opacity: 0, y: 20 }}
+      initial={{ scale: 0.9, opacity: 0, y: 16 }}
       animate={{ scale: 1, opacity: 1, y: 0 }}
-      transition={{ type: 'spring', damping: 15 }}
-      className="relative bg-white/90 backdrop-blur-xl rounded-2xl border border-white/50 shadow-lg p-5 cursor-pointer select-none"
+      transition={{ type: 'spring', damping: 20, stiffness: 300 }}
       onClick={handleClick}
+      className="relative bg-white/80 backdrop-blur-2xl rounded-2xl border border-white/60 shadow-[0_4px_24px_rgba(0,0,0,0.06)] p-5 cursor-pointer select-none"
     >
-      {/* Character name tag */}
-      <div
-        className="absolute -top-3 left-4 px-3 py-0.5 rounded-full text-white text-xs font-bold shadow-md"
-        style={{ backgroundColor: character.color }}
-      >
-        {character.emoji} {character.name}
+      <div className="absolute -top-2.5 left-5 px-3 py-0.5 rounded-full text-[11px] font-bold text-white shadow-md"
+        style={{ backgroundColor: characterColor }}>
+        {characterName}
       </div>
-
-      {/* Message text */}
-      <div className="mt-2 min-h-[60px]">
-        <p className="text-sm leading-relaxed text-gray-800">
-          {displayText}
-          {isTyping && (
-            <motion.span
-              animate={{ opacity: [1, 0] }}
-              transition={{ repeat: Infinity, duration: 0.5 }}
-              className="inline-block w-0.5 h-4 bg-gray-800 ml-0.5 align-middle"
-            />
-          )}
+      <div className="mt-2 min-h-[48px]">
+        <p className="text-[13px] leading-[1.7] text-gray-700">
+          {text}
+          {typing && <motion.span animate={{ opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 0.5 }} className="inline-block w-[2px] h-[14px] bg-gray-600 ml-0.5 align-middle" />}
         </p>
       </div>
-
-      {/* Continue indicator */}
-      <div className="flex justify-end mt-2">
+      <div className="flex justify-between items-center mt-3">
+        {messages.length > 1 && (
+          <div className="flex gap-1">
+            {messages.map((_, i) => (
+              <div key={i} className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${i === idx ? 'bg-gray-700' : i < idx ? 'bg-gray-400' : 'bg-gray-200'}`} />
+            ))}
+          </div>
+        )}
         <AnimatePresence>
-          {!isTyping && (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-xs text-gray-400"
-            >
-              {currentMsg < messages.length - 1 ? '클릭하여 계속 ▶' : '클릭하여 닫기 ✕'}
+          {!typing && (
+            <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[11px] text-gray-400 ml-auto">
+              {idx < messages.length - 1 ? '클릭하여 계속 ▸' : '클릭하여 닫기'}
             </motion.span>
           )}
         </AnimatePresence>
       </div>
-
-      {/* Progress dots */}
-      {messages.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-2">
-          {messages.map((_, i) => (
-            <div
-              key={i}
-              className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                i === currentMsg ? 'bg-gray-800' : i < currentMsg ? 'bg-gray-400' : 'bg-gray-200'
-              }`}
-            />
-          ))}
-        </div>
-      )}
     </motion.div>
   )
 }

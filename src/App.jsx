@@ -6,6 +6,7 @@ import LogisticsTeam from './pages/LogisticsTeam'
 import CSTeam from './pages/CSTeam'
 import DataTeam from './pages/DataTeam'
 import SecretaryTeam from './pages/SecretaryTeam'
+import GlobalLogistics from './pages/GlobalLogistics'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="cs" element={<CSTeam />} />
         <Route path="data" element={<DataTeam />} />
         <Route path="secretary" element={<SecretaryTeam />} />
+        <Route path="global-logistics" element={<GlobalLogistics />} />
       </Route>
     </Routes>
   )
