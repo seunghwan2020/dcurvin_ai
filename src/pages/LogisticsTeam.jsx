@@ -3,8 +3,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import Card from '../components/Card'
 import ReportLayout from '../components/ReportLayout'
 import DecisionPanel from '../components/DecisionPanel'
+import ExecutionChecklist from '../components/ExecutionChecklist'
 import CountUp from '../components/CountUp'
-import { characters, nDeliveryStock, easyAdminStock, restockAlerts, depletionTimeline, oemRecommendation, containerData, logisticsDecisions } from '../data/mockData'
+import { characters, nDeliveryStock, easyAdminStock, restockAlerts, depletionTimeline, oemRecommendation, containerData, logisticsDecisions, executionChecklists } from '../data/mockData'
 
 const c = characters.taehyun
 const msgs = [
@@ -84,6 +85,7 @@ export default function LogisticsTeam() {
           </div>
         </Card>
 
+        <ExecutionChecklist items={executionChecklists.logistics} delay={0.35} />
         {logisticsDecisions.map(d => <DecisionPanel key={d.id} decision={d} characterColor={c.color}/>)}
       </div>
     </ReportLayout>

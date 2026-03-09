@@ -4,8 +4,9 @@ import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, X
 import Card from '../components/Card'
 import ReportLayout from '../components/ReportLayout'
 import DecisionPanel from '../components/DecisionPanel'
+import ExecutionChecklist from '../components/ExecutionChecklist'
 import CountUp from '../components/CountUp'
-import { characters, dailySalesData, weeklySalesData, monthlySalesData, productSalesShare, colorTrendData, colorDetailData, salesForecastData, competitorData, managementDecisions } from '../data/mockData'
+import { characters, dailySalesData, weeklySalesData, monthlySalesData, productSalesShare, colorTrendData, colorDetailData, salesForecastData, competitorData, managementDecisions, executionChecklists } from '../data/mockData'
 
 const c = characters.yujin
 const msgs = [
@@ -83,6 +84,7 @@ export default function ManagementTeam() {
             ))}
           </div>
         </Card>
+        <ExecutionChecklist items={executionChecklists.management} delay={0.4} />
         {managementDecisions.map(d=><DecisionPanel key={d.id} decision={d} characterColor={c.color}/>)}
       </div>
     </ReportLayout>

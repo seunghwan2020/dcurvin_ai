@@ -3,7 +3,8 @@ import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Cart
 import Card from '../components/Card'
 import ReportLayout from '../components/ReportLayout'
 import DecisionPanel from '../components/DecisionPanel'
-import { characters, csStatusData, unansweredCS, claimData, satisfactionData, csDecisions } from '../data/mockData'
+import ExecutionChecklist from '../components/ExecutionChecklist'
+import { characters, csStatusData, unansweredCS, claimData, satisfactionData, csDecisions, executionChecklists } from '../data/mockData'
 
 const c = characters.seoyeon
 const msgs = [
@@ -52,6 +53,7 @@ export default function CSTeam() {
           <ResponsiveContainer width="100%" height={220}><BarChart data={claimData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="month" tick={{fontSize:11}}/><YAxis tick={{fontSize:10}}/><Tooltip/><Legend wrapperStyle={{fontSize:'11px'}}/><Bar dataKey="claims" name="클레임" fill="#ef4444" radius={[4,4,0,0]}/><Bar dataKey="returns" name="반품" fill="#f59e0b" radius={[4,4,0,0]}/><Bar dataKey="refunds" name="환불" fill="#8b5cf6" radius={[4,4,0,0]}/></BarChart></ResponsiveContainer>
         </Card>
 
+        <ExecutionChecklist items={executionChecklists.cs} delay={0.3} />
         {csDecisions.map(d=><DecisionPanel key={d.id} decision={d} characterColor={c.color}/>)}
       </div>
     </ReportLayout>

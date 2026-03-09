@@ -62,15 +62,38 @@ export const competitorData = [
 export const managementDecisions = [
   { id: 'mgmt_1', question: '봄 시즌 마케팅 예산을 어떻게 배분할까요?', context: '밝은 컬러 매출 급상승 중, 전체 매출 상승세',
     choices: [
-      { id: 'a', text: '밝은 컬러 라인 집중 투자', exp: 50, effect: '밝은 컬러 매출 +25% 예상' },
-      { id: 'b', text: '전 라인 균등 배분', exp: 30, effect: '전체 매출 안정적 성장' },
-      { id: 'c', text: '추가 데이터 분석 요청', exp: 20, effect: '다음 보고 시 상세 분석' },
+      { id: 'a', text: '밝은 컬러 라인 집중 투자', exp: 50, effect: '밝은 컬러 매출 +25% 예상',
+        actions: [
+          { text: '마케팅팀에 밝은 컬러 광고 소재 제작 요청', team: '경영지원팀', priority: 'high', due: '오늘' },
+          { text: 'SNS 광고 예산 밝은 컬러 70% 배분 설정', team: '경영지원팀', priority: 'high', due: '내일' },
+          { text: '아이보리/베이지 재고 확보 물류팀 전달', team: '물류팀', priority: 'medium', due: '내일' },
+        ] },
+      { id: 'b', text: '전 라인 균등 배분', exp: 30, effect: '전체 매출 안정적 성장',
+        actions: [
+          { text: '전 라인 마케팅 예산 균등 배분표 작성', team: '경영지원팀', priority: 'medium', due: '내일' },
+          { text: '각 제품별 광고 소재 업데이트 요청', team: '경영지원팀', priority: 'medium', due: '3일 내' },
+        ] },
+      { id: 'c', text: '추가 데이터 분석 요청', exp: 20, effect: '다음 보고 시 상세 분석',
+        reminder: { text: '마케팅 예산 배분 — 추가 분석 결과 확인', team: '경영지원팀', due: '3일 후' },
+        navigateTo: 'data' },
     ] },
   { id: 'mgmt_2', question: '경쟁사 대비 가격 전략은?', context: '시장 점유율 4위, 성장률 업계 1위',
     choices: [
-      { id: 'a', text: '프리미엄 가격 유지', exp: 40, effect: '마진율 유지, 브랜드 강화' },
-      { id: 'b', text: '멤버십 혜택 강화', exp: 45, effect: '재구매율 +20%' },
-      { id: 'c', text: '공격적 할인 (점유율 확대)', exp: 35, effect: '주문 +40%, 마진 -15%' },
+      { id: 'a', text: '프리미엄 가격 유지', exp: 40, effect: '마진율 유지, 브랜드 강화',
+        actions: [
+          { text: '프리미엄 브랜딩 강화 캠페인 기획', team: '경영지원팀', priority: 'medium', due: '이번 주' },
+          { text: '고급 패키징 디자인 검토', team: '경영지원팀', priority: 'low', due: '3/20' },
+        ] },
+      { id: 'b', text: '멤버십 혜택 강화', exp: 45, effect: '재구매율 +20%',
+        actions: [
+          { text: '멤버십 등급별 할인율 재설계', team: '경영지원팀', priority: 'high', due: '이번 주' },
+          { text: '멤버십 리뉴얼 안내 메일 발송 준비', team: '경영지원팀', priority: 'medium', due: '3/15' },
+        ] },
+      { id: 'c', text: '공격적 할인 (점유율 확대)', exp: 35, effect: '주문 +40%, 마진 -15%',
+        actions: [
+          { text: '할인 캠페인 상세 기획안 작성', team: '경영지원팀', priority: 'high', due: '오늘' },
+          { text: '할인 적용 상품 리스트 확정', team: '경영지원팀', priority: 'high', due: '내일' },
+        ] },
     ] },
 ]
 
@@ -126,15 +149,36 @@ export const containerData = {
 export const logisticsDecisions = [
   { id: 'log_1', question: '긴급 재고 2건! 입고 승인하시겠습니까?', context: 'Edge V2 네이비(2.4일), Eddy V2 베이지(2.0일) 소진 임박',
     choices: [
-      { id: 'a', text: '긴급 입고 승인 (당일 출고)', exp: 50, effect: 'N배송 재고 보충, 품절 방지' },
-      { id: 'b', text: '내일 일괄 입고', exp: 30, effect: '물류비 절감, 품절 리스크 존재' },
-      { id: 'c', text: '보류', exp: 15, effect: '품절 가능성 높음' },
+      { id: 'a', text: '긴급 입고 승인 (당일 출고)', exp: 50, effect: 'N배송 재고 보충, 품절 방지',
+        actions: [
+          { text: '쿠팡에서 N배송 입고 신청하기 (Edge V2 네이비 M 50개)', team: '물류팀', priority: 'high', due: '오늘' },
+          { text: '쿠팡에서 N배송 입고 신청하기 (Eddy V2 베이지 F 40개)', team: '물류팀', priority: 'high', due: '오늘' },
+          { text: '이지어드민에서 출고 처리 확인', team: '물류팀', priority: 'high', due: '오늘' },
+        ] },
+      { id: 'b', text: '내일 일괄 입고', exp: 30, effect: '물류비 절감, 품절 리스크 존재',
+        actions: [
+          { text: '내일 오전 N배송 일괄 입고 스케줄 등록', team: '물류팀', priority: 'medium', due: '오늘' },
+          { text: '긴급 품목 품절 알림 설정', team: '물류팀', priority: 'medium', due: '오늘' },
+        ] },
+      { id: 'c', text: '보류', exp: 15, effect: '품절 가능성 높음',
+        reminder: { text: '긴급 재고 입고 건 — 재검토 필요', team: '물류팀', due: '내일' } },
     ] },
   { id: 'log_2', question: 'OEM 발주를 진행할까요?', context: '40ft HQ 적재율 89.4%, 예상 비용 $12,500',
     choices: [
-      { id: 'a', text: 'OEM 발주 승인', exp: 45, effect: '2주 후 입고, 3개월 치 확보' },
-      { id: 'b', text: '물량 10% 추가 (적재율 97%)', exp: 55, effect: '효율 극대화, +$1,200' },
-      { id: 'c', text: '발주 보류', exp: 20, effect: '현금 유동성 확보' },
+      { id: 'a', text: 'OEM 발주 승인', exp: 45, effect: '2주 후 입고, 3개월 치 확보',
+        actions: [
+          { text: 'OEM 공장에 발주서 전송 ($12,500)', team: '물류팀', priority: 'high', due: '오늘' },
+          { text: '발주 확인서 수령 후 입금 처리', team: '경영지원팀', priority: 'high', due: '내일' },
+          { text: '수입 일정표 업데이트 (2주 후 입고)', team: '물류팀', priority: 'medium', due: '내일' },
+        ] },
+      { id: 'b', text: '물량 10% 추가 (적재율 97%)', exp: 55, effect: '효율 극대화, +$1,200',
+        actions: [
+          { text: 'OEM 공장에 10% 추가 발주서 전송 ($13,700)', team: '물류팀', priority: 'high', due: '오늘' },
+          { text: '추가 물량 적재 계획 수정', team: '물류팀', priority: 'medium', due: '오늘' },
+          { text: '발주 확인서 수령 후 입금 처리', team: '경영지원팀', priority: 'high', due: '내일' },
+        ] },
+      { id: 'c', text: '발주 보류', exp: 20, effect: '현금 유동성 확보',
+        reminder: { text: 'OEM 발주 건 — 재검토 (현금 흐름 확인 후)', team: '물류팀', due: '이번 주' } },
     ] },
 ]
 
@@ -166,9 +210,24 @@ export const satisfactionData = [
 export const csDecisions = [
   { id: 'cs_1', question: '24시간 초과 미답변 3건! 어떻게 할까요?', context: '주문 취소, 사이즈 교환, 배송 지연 문의',
     choices: [
-      { id: 'a', text: '즉시 전원 투입', exp: 50, effect: '만족도 회복, CS팀 야근' },
-      { id: 'b', text: '보상 쿠폰과 함께 답변', exp: 45, effect: '만족도 +0.3, 마케팅 비용' },
-      { id: 'c', text: '우선순위별 순차 처리', exp: 35, effect: '효율적, 일부 추가 대기' },
+      { id: 'a', text: '즉시 전원 투입', exp: 50, effect: '만족도 회복, CS팀 야근',
+        actions: [
+          { text: 'CS-0341 김*진 주문 취소 처리 (카페24)', team: 'CS팀', priority: 'high', due: '오늘' },
+          { text: 'CS-0339 이*영 사이즈 교환 접수 처리', team: 'CS팀', priority: 'high', due: '오늘' },
+          { text: 'CS-0338 박*호 배송 지연 사과 + 추적번호 전달', team: 'CS팀', priority: 'high', due: '오늘' },
+        ] },
+      { id: 'b', text: '보상 쿠폰과 함께 답변', exp: 45, effect: '만족도 +0.3, 마케팅 비용',
+        actions: [
+          { text: '24시간 초과 고객 3명에게 5,000원 쿠폰 발급', team: 'CS팀', priority: 'high', due: '오늘' },
+          { text: '쿠폰 포함 사과 답변 템플릿 작성', team: 'CS팀', priority: 'high', due: '오늘' },
+          { text: '3건 순차 답변 완료 후 만족도 체크', team: 'CS팀', priority: 'medium', due: '내일' },
+        ] },
+      { id: 'c', text: '우선순위별 순차 처리', exp: 35, effect: '효율적, 일부 추가 대기',
+        actions: [
+          { text: 'CS-0338 배송 지연 (36h) 최우선 처리', team: 'CS팀', priority: 'high', due: '오늘' },
+          { text: 'CS-0339 사이즈 교환 (28h) 2순위 처리', team: 'CS팀', priority: 'medium', due: '오늘' },
+          { text: 'CS-0341 주문 취소 (26h) 3순위 처리', team: 'CS팀', priority: 'medium', due: '오늘' },
+        ] },
     ] },
 ]
 
@@ -216,9 +275,20 @@ export const reviewSentiment = {
 export const dataDecisions = [
   { id: 'data_1', question: 'Edge V2 + ConnectBag 번들 상품을 만들까요?', context: '조합 구매 12.3%, 번들 시 258,000원 제안',
     choices: [
-      { id: 'a', text: '번들 상품 출시', exp: 50, effect: '주문 단가 +15%, 마진 -3%' },
-      { id: 'b', text: '한정판 패키지 출시', exp: 55, effect: '프리미엄 이미지, 500세트 한정' },
-      { id: 'c', text: '추가 데이터 수집 후 결정', exp: 25, effect: '2주 후 재보고' },
+      { id: 'a', text: '번들 상품 출시', exp: 50, effect: '주문 단가 +15%, 마진 -3%',
+        actions: [
+          { text: '카페24에 번들 상품 등록 (258,000원)', team: '고객데이터분석팀', priority: 'high', due: '이번 주' },
+          { text: '번들 상품 상세페이지 디자인 요청', team: '고객데이터분석팀', priority: 'medium', due: '3일 내' },
+          { text: '번들 재고 100세트 선확보 (물류팀 전달)', team: '물류팀', priority: 'medium', due: '이번 주' },
+        ] },
+      { id: 'b', text: '한정판 패키지 출시', exp: 55, effect: '프리미엄 이미지, 500세트 한정',
+        actions: [
+          { text: '한정판 패키지 디자인 컨셉 기획', team: '고객데이터분석팀', priority: 'high', due: '이번 주' },
+          { text: '500세트 한정 재고 확보 (물류팀 조율)', team: '물류팀', priority: 'high', due: '이번 주' },
+          { text: '한정판 출시 SNS 티저 콘텐츠 제작', team: '경영지원팀', priority: 'medium', due: '3/15' },
+        ] },
+      { id: 'c', text: '추가 데이터 수집 후 결정', exp: 25, effect: '2주 후 재보고',
+        reminder: { text: '번들 상품 — 추가 데이터 분석 결과 확인', team: '고객데이터분석팀', due: '2주 후' } },
     ] },
 ]
 
@@ -231,14 +301,39 @@ export const mailSummary = [
   { id: 5, from: '물류 파트너사', subject: '택배 단가 협상 결과', time: '2일 전', important: false, read: true },
   { id: 6, from: '마케팅 에이전시', subject: '3월 SNS 광고 성과 보고', time: '2일 전', important: false, read: true },
 ]
-export const initialTodos = [
-  { id: 1, text: 'OEM 발주 최종 승인', priority: 'high', done: false, due: '오늘' },
-  { id: 2, text: 'N배송 수수료 변경 검토', priority: 'high', done: false, due: '오늘' },
-  { id: 3, text: 'S/S 디자인 시안 피드백', priority: 'medium', done: false, due: '내일' },
-  { id: 4, text: '월간 경영 회의 준비', priority: 'medium', done: false, due: '3/12' },
-  { id: 5, text: '결산 보고서 검토', priority: 'low', done: true, due: '완료' },
-  { id: 6, text: '택배 단가 협상 결과 확인', priority: 'low', done: true, due: '완료' },
-]
+// execution checklists per team
+export const executionChecklists = {
+  management: [
+    { text: '이지어드민에서 오늘 매출 확인하기', link: 'easyadmin' },
+    { text: '카페24 관리자에서 주문 현황 체크', link: 'cafe24' },
+    { text: '네이버 스마트스토어 매출 확인', link: 'naver' },
+    { text: '쿠팡 윙 매출 데이터 조회', link: 'coupang' },
+  ],
+  logistics: [
+    { text: '쿠팡에서 N배송 입고 신청하기', link: 'coupang' },
+    { text: '이지어드민에서 재고 확인하기', link: 'easyadmin' },
+    { text: '중국 OEM 공장 생산 현황 확인', link: 'factory' },
+    { text: '택배사 수거 요청 확인', link: 'delivery' },
+  ],
+  cs: [
+    { text: '카페24 CS 게시판 미답변 확인', link: 'cafe24' },
+    { text: '네이버 톡톡 미확인 메시지 처리', link: 'naver' },
+    { text: '쿠팡 고객 문의 답변 처리', link: 'coupang' },
+    { text: '교환/반품 접수 현황 처리', link: 'returns' },
+  ],
+  data: [
+    { text: '구글 애널리틱스 트래픽 확인', link: 'ga' },
+    { text: '카페24 상품별 판매 데이터 다운로드', link: 'cafe24' },
+    { text: '리뷰 모니터링 (네이버/쿠팡)', link: 'review' },
+    { text: '고객 세그먼트 업데이트', link: 'crm' },
+  ],
+  secretary: [
+    { text: '대표님 메일함 미확인 메일 정리', link: 'mail' },
+    { text: '오늘의 회의 스케줄 최종 확인', link: 'calendar' },
+    { text: '각 팀 To-Do 진행 상황 점검', link: 'todo' },
+    { text: '주요 의사결정 현황 보고 준비', link: 'report' },
+  ],
+}
 export const scheduleData = [
   { time: '09:00', event: '모닝 브리핑', team: '전체', icon: '🤝' },
   { time: '10:30', event: 'OEM 발주 미팅', team: '물류팀', icon: '📦' },
@@ -256,9 +351,22 @@ export const keyDecisions = [
 export const secretaryDecisions = [
   { id: 'sec_1', question: '오늘 핵심 의사결정 2건 — 어떤 것부터?', context: 'OEM 발주(오늘 18시 마감) vs N배송 수수료(3/15 마감)',
     choices: [
-      { id: 'a', text: 'OEM 발주부터 (마감 임박)', exp: 40, effect: '물류팀에 승인 전달' },
-      { id: 'b', text: 'N배송 수수료부터 (전략적)', exp: 45, effect: '협상 여지 확보' },
-      { id: 'c', text: '두 건 모두 팀장 소집', exp: 50, effect: '빠른 의사결정, 30분 소요' },
+      { id: 'a', text: 'OEM 발주부터 (마감 임박)', exp: 40, effect: '물류팀에 승인 전달',
+        actions: [
+          { text: '물류팀에 OEM 발주 승인 전달', team: '비서팀', priority: 'high', due: '오늘 12시' },
+          { text: 'N배송 수수료 검토 일정 잡기', team: '비서팀', priority: 'medium', due: '오늘 오후' },
+        ] },
+      { id: 'b', text: 'N배송 수수료부터 (전략적)', exp: 45, effect: '협상 여지 확보',
+        actions: [
+          { text: '네이버 담당자에게 수수료 협상 회신', team: '비서팀', priority: 'high', due: '오늘 오전' },
+          { text: 'OEM 발주 건 오후 긴급 처리 스케줄링', team: '비서팀', priority: 'high', due: '오늘 오후' },
+        ] },
+      { id: 'c', text: '두 건 모두 팀장 소집', exp: 50, effect: '빠른 의사결정, 30분 소요',
+        actions: [
+          { text: '물류팀장 + 경영지원팀장 긴급 회의 소집', team: '비서팀', priority: 'high', due: '오늘 10시' },
+          { text: '회의실 예약 및 안건 정리', team: '비서팀', priority: 'high', due: '지금 즉시' },
+          { text: '회의 결과 정리 후 각 팀 전달', team: '비서팀', priority: 'medium', due: '오늘 11시' },
+        ] },
     ] },
 ]
 

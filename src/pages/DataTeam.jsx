@@ -3,8 +3,9 @@ import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveCo
 import Card from '../components/Card'
 import ReportLayout from '../components/ReportLayout'
 import DecisionPanel from '../components/DecisionPanel'
+import ExecutionChecklist from '../components/ExecutionChecklist'
 import CountUp from '../components/CountUp'
-import { characters, productSalesData, sizeHeatmap, colorHeatmap, purchasePatterns, reviewSentiment, dataDecisions } from '../data/mockData'
+import { characters, productSalesData, sizeHeatmap, colorHeatmap, purchasePatterns, reviewSentiment, dataDecisions, executionChecklists } from '../data/mockData'
 
 const c = characters.minjun
 const msgs = [
@@ -95,6 +96,7 @@ export default function DataTeam() {
           </div>
         </Card>
 
+        <ExecutionChecklist items={executionChecklists.data} delay={0.35} />
         {dataDecisions.map(d => <DecisionPanel key={d.id} decision={d} characterColor={c.color}/>)}
       </div>
     </ReportLayout>
