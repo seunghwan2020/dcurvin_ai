@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import CSSAvatar from './CSSAvatar'
+import SVGAvatar from './SVGAvatar'
 import DialogBox from './DialogBox'
 import { useGame } from '../context/GameContext'
 
@@ -26,13 +26,13 @@ export default function ReportLayout({ characterId, characterName, characterColo
           transition={{ duration: 0.5 }}
           className="flex-shrink-0 flex flex-col items-center"
         >
-          <CSSAvatar characterId={characterId} size="lg" expression={dialogDone ? 'happy' : 'neutral'} />
+          <SVGAvatar characterId={characterId} size={140} expression={dialogDone ? 'happy' : 'neutral'} />
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="mt-2 px-3 py-1 rounded-full text-[11px] font-bold text-white"
-            style={{ backgroundColor: characterColor }}
+            className="mt-1 px-4 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm"
+            style={{ background: `linear-gradient(135deg, ${characterColor}, ${characterColor}cc)` }}
           >
             {characterName}
           </motion.div>
@@ -56,7 +56,12 @@ export default function ReportLayout({ characterId, characterName, characterColo
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white/70 backdrop-blur-2xl rounded-2xl border border-white/60 shadow-sm p-4"
+              className="rounded-2xl border p-4"
+              style={{
+                background: 'rgba(255,255,255,0.7)',
+                backdropFilter: 'blur(24px)',
+                borderColor: `${characterColor}20`,
+              }}
             >
               <p className="text-[13px] text-gray-500">
                 <span className="font-semibold text-gray-700">{characterName}</span>: 아래 데이터를 자유롭게 확인해주세요, 대표님!
