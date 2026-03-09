@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { BarChart, Bar, LineChart, Line, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import SVGAvatar from '../components/SVGAvatar'
 import KpiCard from '../components/KpiCard'
 import DailyQuests from '../components/DailyQuests'
-import { characters } from '../data/mockData'
+import Card from '../components/Card'
+import CountUp from '../components/CountUp'
+import { characters, exchangeRateData, recentDailySales, inventoryGauge } from '../data/mockData'
 import { useGame } from '../context/GameContext'
 
 const teamCards = [
@@ -13,6 +16,103 @@ const teamCards = [
   { id: 'minjun', path: '/data', preview: 'ConnectBag 성장률 22.8% · 번들 제안' },
   { id: 'haeun', path: '/secretary', preview: '핵심 의사결정 2건 · 미확인 메일 2건' },
 ]
+
+/* 직급 배지 */
+function TitleBadge({ title, color }) {
+  return (
+    <span className="ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold text-white"
+      style={{ background: color, boxShadow: `0 1px 4px ${color}40` }}>
+      {title}
+    </span>
+  )
+}
+
+/* 환율 미니 스파크라인 */
+function ExchangeWidget() {
+  const { current, previous, change, direction, weekly } = exchangeRateData
+  return (
+    <Card title="엔화 환율 (JPY→KRW)" icon="💱" delay={0.25}>
+      <div className="flex items-end justify-between mb-2">
+        <div>
+          <p className="text-2xl font-bold text-gray-800">₩<CountUp end={current} decimals={2} /></p>
+          <p className={`text-[11px] font-semibold ${direction === 'up' ? 'text-red-500' : 'text-emerald-500'}`}>
+            {direction === 'up' ? '▲' : '▼'} {change}% <span className="text-gray-300 font-normal">전일 ₩{previous}</span>
+          </p>
+        </div>
+      </div>
+      <ResponsiveContainer width="100%" height={60}>
+        <LineChart data={weekly}>
+          <Line type="monotone" dataKey="rate" stroke={direction === 'up' ? '#ef4444' : '#22c55e'} strokeWidth={2} dot={false} />
+          <Tooltip formatter={v => `₩${v}`} labelFormatter={l => l} contentStyle={{ fontSize: '11px', borderRadius: '8px' }} />
+        </LineChart>
+      </ResponsiveContainer>
+      <div className="flex justify-between text-[9px] text-gray-300 mt-1">
+        {weekly.map(d => <span key={d.date}>{d.date}</span>)}
+      </div>
+    </Card>
+  )
+}
+
+/* 매출 추이 미니 바차트 */
+function SalesMiniChart() {
+  return (
+    <Card title="최근 14일 매출" icon="📊" delay={0.3}>
+      <ResponsiveContainer width="100%" height={100}>
+        <BarChart data={recentDailySales} barCategoryGap={2}>
+          <XAxis dataKey="date" tick={false} axisLine={false} />
+          <Tooltip formatter={v => `₩${v.toLocaleString()}`} contentStyle={{ fontSize: '11px', borderRadius: '8px' }} />
+          <Bar dataKey="sales" radius={[3, 3, 0, 0]}>
+            {recentDailySales.map((entry, i) => (
+              <motion.rect key={i} fill={entry.isToday ? '#C4A661' : '#e5e7eb'} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+      <div className="flex items-center justify-between mt-1">
+        <span className="text-[9px] text-gray-300">14일 전</span>
+        <span className="text-[10px] font-semibold" style={{ color: '#C4A661' }}>오늘: ₩{recentDailySales[recentDailySales.length - 1].sales.toLocaleString()}</span>
+      </div>
+    </Card>
+  )
+}
+
+/* 재고 현황 게이지 */
+function InventoryGaugeWidget() {
+  const { depletionRate, dangerItems, alertText } = inventoryGauge
+  const circumference = 2 * Math.PI * 40
+  const offset = circumference - (depletionRate / 100) * circumference
+  return (
+    <Card title="재고 소진율" icon="📦" delay={0.35}>
+      <div className="flex items-center gap-4">
+        <div className="relative w-[90px] h-[90px] flex-shrink-0">
+          <svg width="90" height="90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" strokeWidth="8" />
+            <motion.circle cx="50" cy="50" r="40" fill="none" stroke={depletionRate > 60 ? '#f59e0b' : '#22c55e'} strokeWidth="8"
+              strokeLinecap="round" strokeDasharray={circumference} initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset: offset }} transition={{ duration: 1.5, delay: 0.5 }}
+              transform="rotate(-90 50 50)" />
+            <text x="50" y="46" textAnchor="middle" className="text-xl font-bold" fill="#1f2937" fontSize="20">{depletionRate}</text>
+            <text x="50" y="62" textAnchor="middle" fill="#9ca3af" fontSize="10">%</text>
+          </svg>
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-1.5 mb-2">
+            <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}
+              className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600">
+              위험 {dangerItems}개
+            </motion.span>
+          </div>
+          <p className="text-[11px] text-gray-500 leading-relaxed">{alertText}</p>
+          <div className="mt-2 space-y-0.5">
+            {inventoryGauge.dangerList.map((item, i) => (
+              <p key={i} className="text-[10px] text-red-400">• {item.name} ({item.daysLeft}일)</p>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Card>
+  )
+}
 
 export default function OfficeMap() {
   const navigate = useNavigate()
@@ -34,6 +134,13 @@ export default function OfficeMap() {
         <KpiCard label="총 주문" value={342} suffix="건" change={5.2} icon="📦" delay={0.1} />
         <KpiCard label="미답변 CS" value={8} suffix="건" change={-12.5} icon="💬" delay={0.15} />
         <KpiCard label="재고 부족" value={5} suffix="종" change={-20} icon="⚠️" delay={0.2} />
+      </div>
+
+      {/* Dashboard Widgets Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <ExchangeWidget />
+        <SalesMiniChart />
+        <InventoryGaugeWidget />
       </div>
 
       {/* Team Cards Grid */}
@@ -69,7 +176,10 @@ export default function OfficeMap() {
                   </motion.div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] font-bold tracking-wider uppercase opacity-60" style={{ color: char.color }}>{char.team}</p>
-                    <p className="text-[14px] font-bold text-gray-800 mt-0.5">{char.name}</p>
+                    <p className="text-[14px] font-bold text-gray-800 mt-0.5">
+                      {char.name}
+                      <TitleBadge title={char.title} color={char.color} />
+                    </p>
                     <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">{tc.preview}</p>
                   </div>
                 </div>
@@ -95,30 +205,33 @@ export default function OfficeMap() {
         >
           <motion.button
             onClick={() => navigate('/global-logistics')}
-            whileHover={{ y: -6, boxShadow: '0 12px 40px rgba(196,166,97,0.15), 0 0 0 1px rgba(196,166,97,0.3)' }}
+            whileHover={{ y: -6, boxShadow: '0 12px 40px rgba(45,138,78,0.15), 0 0 0 1px rgba(45,138,78,0.3)' }}
             whileTap={{ scale: 0.97 }}
             className="w-full text-left p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden group gold-border-glow ripple-container"
             style={{
-              background: 'linear-gradient(135deg, rgba(196,166,97,0.08) 0%, rgba(255,255,255,0.8) 100%)',
+              background: 'linear-gradient(135deg, rgba(45,138,78,0.06) 0%, rgba(255,255,255,0.8) 100%)',
               backdropFilter: 'blur(24px)',
               WebkitBackdropFilter: 'blur(24px)',
-              borderColor: 'rgba(196,166,97,0.25)',
+              borderColor: 'rgba(45,138,78,0.25)',
               boxShadow: '0 2px 16px rgba(0,0,0,0.03)',
             }}
           >
-            <div className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(90deg, transparent, #C4A661, transparent)' }} />
+            <div className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(90deg, transparent, #2d8a4e, transparent)' }} />
             <div className="flex items-center gap-4">
-              <div className="w-[80px] h-[80px] rounded-2xl flex items-center justify-center text-3xl" style={{ background: 'linear-gradient(135deg, #C4A661 0%, #d4b96e 100%)' }}>
-                🌏
-              </div>
+              <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 3.5, ease: 'easeInOut' }}>
+                <SVGAvatar characterId="hanwei" size={80} expression="happy" />
+              </motion.div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold tracking-wider uppercase text-[#C4A661]">GLOBAL</p>
-                <p className="text-[14px] font-bold text-gray-800 mt-0.5">글로벌 물류센터</p>
+                <p className="text-[10px] font-bold tracking-wider uppercase text-[#2d8a4e]">GLOBAL LOGISTICS</p>
+                <p className="text-[14px] font-bold text-gray-800 mt-0.5">
+                  한웨이 매니저
+                  <TitleBadge title="매니저" color="#2d8a4e" />
+                </p>
                 <p className="text-[11px] text-gray-400 mt-1">발주/수입 현황 · 파이프라인 관리</p>
               </div>
             </div>
             <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0 translate-x-[-4px]">
-              <span className="text-[16px] text-[#C4A661]">→</span>
+              <span className="text-[16px] text-[#2d8a4e]">→</span>
             </div>
           </motion.button>
         </motion.div>

@@ -9,7 +9,7 @@ import { characters, nDeliveryStock, easyAdminStock, restockAlerts, depletionTim
 
 const c = characters.taehyun
 const msgs = [
-  { text: '대표님! 물류팀 태현 보고드립니다. 오늘 재고 상황 좀 급합니다!' },
+  { text: '대표님! 물류팀 이태현 대리 보고드립니다. 오늘 재고 상황 좀 급합니다!' },
   { text: '긴급! Edge V2 네이비 M이 2.4일, Eddy V2 베이지가 2일 안에 소진됩니다!' },
   { text: 'N배송 입고 시급한 건 4건이에요. 본사 창고에 재고 있으니 즉시 입고 가능합니다.' },
   { text: 'OEM 발주도 준비했어요. 40ft HQ 컨테이너 적재율 89.4%로 최적화했습니다!' },

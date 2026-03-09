@@ -9,7 +9,7 @@ import { characters, mailSummary, scheduleData, keyDecisions, secretaryDecisions
 
 const c = characters.haeun
 const msgs = [
-  { text: '대표님, 좋은 아침이에요! 비서실장 하은입니다.' },
+  { text: '대표님, 좋은 아침입니다. 비서팀 정하은 대리 보고드립니다.' },
   { text: '읽지 않은 중요 메일이 2건 있어요. OEM 생산 완료와 N배송 수수료 변경 안내입니다.' },
   { text: '오늘 회의 3건, 핵심 의사결정 2건! OEM 발주 승인은 오늘 18시 마감이에요.' },
   { text: '각 팀에서 생성된 할 일도 아래에서 통합 관리하고 있어요!' },

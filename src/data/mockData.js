@@ -2,11 +2,50 @@
 
 // ── Characters ──
 export const characters = {
-  yujin: { id: 'yujin', name: '재무 분석관 유진', team: '경영지원팀', color: '#3b5998', questId: 'q1' },
-  taehyun: { id: 'taehyun', name: '물류 대장 태현', team: '물류팀', color: '#e67e22', questId: 'q3' },
-  seoyeon: { id: 'seoyeon', name: '고객 수호자 서연', team: 'CS팀', color: '#e84393', questId: 'q2' },
-  minjun: { id: 'minjun', name: '데이터 마법사 민준', team: '고객데이터분석팀', color: '#6c5ce7', questId: null },
-  haeun: { id: 'haeun', name: '비서실장 하은', team: '비서팀', color: '#C4A661', questId: 'q5' },
+  yujin: { id: 'yujin', name: '김유진 과장', team: '경영지원팀', color: '#3b5998', questId: 'q1', title: '과장', fullName: '김유진' },
+  taehyun: { id: 'taehyun', name: '이태현 대리', team: '물류팀', color: '#e67e22', questId: 'q3', title: '대리', fullName: '이태현' },
+  seoyeon: { id: 'seoyeon', name: '박서연 사원', team: 'CS팀', color: '#e84393', questId: 'q2', title: '사원', fullName: '박서연' },
+  minjun: { id: 'minjun', name: '최민준 주임', team: '고객데이터분석팀', color: '#6c5ce7', questId: null, title: '주임', fullName: '최민준' },
+  haeun: { id: 'haeun', name: '정하은 대리', team: '비서팀', color: '#C4A661', questId: 'q5', title: '대리', fullName: '정하은' },
+  hanwei: { id: 'hanwei', name: '한웨이 매니저', team: '글로벌물류', color: '#2d8a4e', questId: null, title: '매니저', fullName: '한웨이' },
+}
+
+// ── 환율 데이터 ──
+export const exchangeRateData = {
+  current: 9.12,
+  previous: 9.05,
+  change: 0.77,
+  direction: 'up',
+  weekly: [
+    { date: '3/3', rate: 8.98 },
+    { date: '3/4', rate: 9.02 },
+    { date: '3/5', rate: 8.95 },
+    { date: '3/6', rate: 9.08 },
+    { date: '3/7', rate: 9.05 },
+    { date: '3/8', rate: 9.10 },
+    { date: '3/9', rate: 9.12 },
+  ],
+}
+
+// ── 최근 14일 매출 (미니차트용) ──
+export const recentDailySales = Array.from({ length: 14 }, (_, i) => {
+  const d = new Date(2026, 2, i - 4)
+  const base = 3_800_000 + Math.sin(i / 3) * 800_000
+  const isToday = i === 13
+  return { date: `${d.getMonth()+1}/${d.getDate()}`, sales: Math.round(base + (Math.random()-0.3)*400_000), isToday }
+})
+
+// ── 재고 현황 게이지 ──
+export const inventoryGauge = {
+  totalSKU: 48,
+  depletionRate: 67.5,
+  dangerItems: 3,
+  dangerList: [
+    { name: 'Edge V2 네이비 M', daysLeft: 2.4 },
+    { name: 'Eddy V2 베이지 FREE', daysLeft: 2.0 },
+    { name: 'Eddy V2 아이보리 FREE', daysLeft: 4.0 },
+  ],
+  alertText: '3개 품목 5일 내 소진 예상',
 }
 
 // ── 경영지원팀 (유진) ──
@@ -372,21 +411,47 @@ export const secretaryDecisions = [
 
 // ── 글로벌 물류센터 (발주/수입) ──
 export const ordersList = [
-  { id: 'PO-2026-001', date: '2026-01-15', product: 'Edge V2', variants: '블랙M/L, 네이비M', qty: 1500, status: '완료', progress: 100 },
-  { id: 'PO-2026-002', date: '2026-02-01', product: 'Eddy V2', variants: '베이지F, 아이보리F', qty: 1200, status: '부분수입', progress: 60 },
-  { id: 'PO-2026-003', date: '2026-02-20', product: 'Guardian', variants: '블랙M, 카키L', qty: 800, status: '제작완료', progress: 40 },
-  { id: 'PO-2026-004', date: '2026-03-01', product: 'ConnectBag', variants: '그레이, 블랙', qty: 600, status: '제작중', progress: 20 },
-  { id: 'PO-2026-005', date: '2026-03-05', product: 'Edge V2', variants: '블랙M/L, 베이지M', qty: 2000, status: '제작중', progress: 10 },
+  { id: 'PO-2026-001', date: '2026-01-15', product: 'Edge V2', variants: '블랙M/L, 네이비M', qty: 1500, status: '완료', progress: 100, chinaQty: 0, importedQty: 1500, remainQty: 0, expectedDone: '2026-01-25' },
+  { id: 'PO-2026-002', date: '2026-02-01', product: 'Eddy V2', variants: '베이지F, 아이보리F', qty: 1200, status: '부분수입', progress: 60, chinaQty: 720, importedQty: 480, remainQty: 0, expectedDone: '2026-02-10' },
+  { id: 'PO-2026-003', date: '2026-02-20', product: 'Guardian', variants: '블랙M, 카키L', qty: 800, status: '제작완료', progress: 40, chinaQty: 800, importedQty: 0, remainQty: 0, expectedDone: '2026-03-01' },
+  { id: 'PO-2026-004', date: '2026-03-01', product: 'ConnectBag', variants: '그레이, 블랙', qty: 600, status: '제작중', progress: 20, chinaQty: 0, importedQty: 0, remainQty: 600, expectedDone: '2026-03-20' },
+  { id: 'PO-2026-005', date: '2026-03-05', product: 'Edge V2', variants: '블랙M/L, 베이지M', qty: 2000, status: '제작중', progress: 10, chinaQty: 0, importedQty: 0, remainQty: 2000, expectedDone: '2026-04-05' },
 ]
 export const chinaWarehouse = [
-  { product: 'Eddy V2 베이지 FREE', qty: 480, fromOrder: 'PO-2026-002', importable: true },
-  { product: 'Eddy V2 아이보리 FREE', qty: 240, fromOrder: 'PO-2026-002', importable: true },
-  { product: 'Guardian 블랙 M', qty: 400, fromOrder: 'PO-2026-003', importable: true },
-  { product: 'Guardian 카키 L', qty: 400, fromOrder: 'PO-2026-003', importable: true },
+  { id: 'CW-001', product: 'Eddy V2 베이지 FREE', qty: 480, fromOrder: 'PO-2026-002', importable: true, storedDate: '2026-02-10', cbmPerUnit: 0.035, monthsStored: 1.0 },
+  { id: 'CW-002', product: 'Eddy V2 아이보리 FREE', qty: 240, fromOrder: 'PO-2026-002', importable: true, storedDate: '2026-02-10', cbmPerUnit: 0.035, monthsStored: 1.0 },
+  { id: 'CW-003', product: 'Guardian 블랙 M', qty: 400, fromOrder: 'PO-2026-003', importable: true, storedDate: '2026-03-01', cbmPerUnit: 0.045, monthsStored: 0.3 },
+  { id: 'CW-004', product: 'Guardian 카키 L', qty: 400, fromOrder: 'PO-2026-003', importable: true, storedDate: '2026-03-01', cbmPerUnit: 0.045, monthsStored: 0.3 },
 ]
 export const importHistory = [
-  { id: 'IMP-001', date: '2026-01-28', container: '40ft HQ', items: 'Edge V2 1500ea', cbm: 67.5, fillRate: 88.5, status: '입고완료' },
-  { id: 'IMP-002', date: '2026-02-15', container: '40ft HQ', items: 'Eddy V2 720ea', cbm: 48.2, fillRate: 63.2, status: '입고완료' },
-  { id: 'IMP-003', date: '2026-03-08', container: '40ft HQ', items: 'Mixed', cbm: 68.2, fillRate: 89.4, status: '운송중' },
+  { id: 'IMP-001', date: '2026-01-28', container: '40ft HQ', items: 'Edge V2 1500ea', cbm: 67.5, fillRate: 88.5, status: '입고완료', products: [{ name: 'Edge V2 블랙 M', qty: 500 }, { name: 'Edge V2 블랙 L', qty: 500 }, { name: 'Edge V2 네이비 M', qty: 500 }] },
+  { id: 'IMP-002', date: '2026-02-15', container: '40ft HQ', items: 'Eddy V2 720ea', cbm: 48.2, fillRate: 63.2, status: '입고완료', products: [{ name: 'Eddy V2 베이지 FREE', qty: 480 }, { name: 'Eddy V2 아이보리 FREE', qty: 240 }] },
+  { id: 'IMP-003', date: '2026-03-08', container: '40ft HQ', items: 'Mixed', cbm: 68.2, fillRate: 89.4, status: '운송중', products: [{ name: 'Edge V2', qty: 500 }, { name: 'Eddy V2', qty: 750 }, { name: 'Guardian', qty: 200 }, { name: 'ConnectBag', qty: 300 }] },
 ]
 export const pipelineData = { order: 2600, production: 2800, china: 1520, import: 1750, domestic: 2400, sales: 3200 }
+export const pipelineStages = [
+  { id: 'order', label: '발주 등록', count: 2600, icon: '📝', color: '#6366f1' },
+  { id: 'production', label: '제작 중', count: 2800, icon: '🏭', color: '#f59e0b' },
+  { id: 'china', label: '중국창고', count: 1520, icon: '🏬', color: '#2d8a4e' },
+  { id: 'import', label: '수입 준비', count: 1750, icon: '📋', color: '#8b5cf6' },
+  { id: 'shipping', label: '운송 중', count: 1750, icon: '🚢', color: '#0ea5e9' },
+  { id: 'domestic', label: '국내 입고', count: 2400, icon: '📦', color: '#14b8a6' },
+  { id: 'sales', label: '판매', count: 3200, icon: '🛍️', color: '#C4A661' },
+]
+// 제품별 CBM 참고 데이터 (컨테이너 시뮬레이터용)
+export const productCBM = {
+  'Edge V2': { cbmPerUnit: 0.045, boxQty: 10, cbmPerBox: 0.45 },
+  'Eddy V2': { cbmPerUnit: 0.035, boxQty: 10, cbmPerBox: 0.35 },
+  'Guardian': { cbmPerUnit: 0.060, boxQty: 10, cbmPerBox: 0.60 },
+  'ConnectBag': { cbmPerUnit: 0.025, boxQty: 10, cbmPerBox: 0.25 },
+}
+export const domesticInventory = [
+  { sku: 'EDGE-V2-BK-M', name: 'Edge V2 블랙 M', nDelivery: 45, easyAdmin: 120, lastImport: 'IMP-001', matched: true },
+  { sku: 'EDGE-V2-BK-L', name: 'Edge V2 블랙 L', nDelivery: 32, easyAdmin: 85, lastImport: 'IMP-001', matched: true },
+  { sku: 'EDGE-V2-NV-M', name: 'Edge V2 네이비 M', nDelivery: 12, easyAdmin: 200, lastImport: 'IMP-001', matched: false },
+  { sku: 'EDDY-V2-BG-F', name: 'Eddy V2 베이지 FREE', nDelivery: 8, easyAdmin: 150, lastImport: 'IMP-002', matched: true },
+  { sku: 'EDDY-V2-IV-F', name: 'Eddy V2 아이보리 FREE', nDelivery: 28, easyAdmin: 95, lastImport: 'IMP-002', matched: true },
+  { sku: 'GUARD-KH-L', name: 'Guardian 카키 L', nDelivery: 65, easyAdmin: 180, lastImport: null, matched: null },
+  { sku: 'GUARD-BK-M', name: 'Guardian 블랙 M', nDelivery: 52, easyAdmin: 160, lastImport: null, matched: null },
+  { sku: 'CBAG-GY-ONE', name: 'ConnectBag 그레이', nDelivery: 85, easyAdmin: 250, lastImport: null, matched: null },
+]

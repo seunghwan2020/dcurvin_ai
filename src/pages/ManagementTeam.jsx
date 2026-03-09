@@ -10,7 +10,7 @@ import { characters, dailySalesData, weeklySalesData, monthlySalesData, productS
 
 const c = characters.yujin
 const msgs = [
-  { text: '대표님, 경영지원팀 유진입니다! 오늘의 매출 현황을 보고드리겠습니다.' },
+  { text: '대표님, 경영지원팀 김유진 과장입니다. 오늘의 매출 현황을 보고드리겠습니다.' },
   { text: '이번 달 매출 1억 1,840만원, 전월 대비 12.8% 상승! 봄 시즌 효과가 확실합니다.' },
   { text: '밝은 컬러 라인이 강세예요. 아이보리/크림 계열이 전체의 22%로 1위입니다.' },
   { text: '경쟁사 대비 성장률은 업계 1위! 아래 상세 데이터를 확인해주세요.' },

@@ -8,7 +8,7 @@ import { characters, csStatusData, unansweredCS, claimData, satisfactionData, cs
 
 const c = characters.seoyeon
 const msgs = [
-  { text: '대표님, CS팀 서연이에요! 고객 문의 현황 보고드립니다.' },
+  { text: '대표님, CS팀 박서연 사원입니다. 고객 문의 현황 보고드립니다.' },
   { text: '미답변 8건 중 3건이 24시간을 초과했어요. 긴급 처리가 필요합니다!' },
   { text: '좋은 소식도 있어요! 고객 만족도가 4.5점으로 사상 최고치예요!' },
   { text: '클레임과 반품도 크게 줄었어요. 품질 개선 효과가 나타나고 있습니다.' },

@@ -9,7 +9,7 @@ import { characters, productSalesData, sizeHeatmap, colorHeatmap, purchasePatter
 
 const c = characters.minjun
 const msgs = [
-  { text: '대표님, 데이터 분석 결과를 가져왔습니다. 흥미로운 인사이트가 있어요!' },
+  { text: '대표님, 고객데이터분석팀 최민준 주임입니다. 분석 결과를 보고드립니다.' },
   { text: 'Edge V2가 여전히 1위인데, ConnectBag 성장률이 22.8%로 가장 높아요!' },
   { text: '흥미로운 발견! Edge V2와 ConnectBag 함께 사는 고객이 12.3%나 됩니다.' },
   { text: '리뷰 감성 분석도 했어요. 전체 긍정률 72%, 평균 별점 4.3점입니다!' },
