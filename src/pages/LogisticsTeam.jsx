@@ -23,11 +23,11 @@ export default function LogisticsTeam() {
           <div className="space-y-2">
             {restockAlerts.map((item, i) => (
               <motion.div key={item.sku} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 + i * 0.07 }}
-                className={`flex items-center justify-between p-3 rounded-xl border ${item.urgency === '긴급' ? 'bg-red-50/60 border-red-200/60' : 'bg-amber-50/60 border-amber-200/60'}`}>
+                className={`flex items-center justify-between p-3 rounded-xl border ${item.urgency === '긴급' ? 'bg-red-50/60 border-red-200/60' : 'bg-[#EFF4F1] border-[#C6D5CC]'}`}>
                 <div><p className="text-[13px] font-medium text-gray-800">{item.name}</p><p className="text-[10px] text-gray-400">{item.sku}</p></div>
-                <div className="text-right"><p className={`text-[13px] font-bold ${item.urgency === '긴급' ? 'text-red-500' : 'text-amber-500'}`}>{item.daysLeft}일 후 소진</p><p className="text-[10px] text-gray-400">필요: {item.needed}개</p></div>
-                <motion.span animate={item.urgency === '긴급' ? { boxShadow: ['0 0 0 0 rgba(239,68,68,0.4)', '0 0 0 6px rgba(239,68,68,0)', '0 0 0 0 rgba(239,68,68,0.4)'] } : {}} transition={{ repeat: Infinity, duration: 2 }}
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${item.urgency === '긴급' ? 'bg-red-500' : 'bg-amber-500'}`}>{item.urgency}</motion.span>
+                <div className="text-right"><p className={`text-[13px] font-bold ${item.urgency === '긴급' ? 'text-[#C45C5C]' : 'text-[#7A9B88]'}`}>{item.daysLeft}일 후 소진</p><p className="text-[10px] text-gray-400">필요: {item.needed}개</p></div>
+                <motion.span animate={item.urgency === '긴급' ? { boxShadow: ['0 0 0 0 rgba(196,92,92,0.4)', '0 0 0 6px rgba(196,92,92,0)', '0 0 0 0 rgba(196,92,92,0.4)'] } : {}} transition={{ repeat: Infinity, duration: 2 }}
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${item.urgency === '긴급' ? 'bg-[#C45C5C]' : 'bg-[#7A9B88]'}`}>{item.urgency}</motion.span>
               </motion.div>
             ))}
           </div>
@@ -48,7 +48,7 @@ export default function LogisticsTeam() {
                 return <motion.tr key={item.sku} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 + i * 0.04 }} className="border-b border-gray-50 hover:bg-gray-50/30">
                   <td className="py-2 px-2 text-gray-400 font-mono text-[10px]">{item.sku}</td><td className="py-2 px-2 text-gray-700">{item.name}</td>
                   <td className="py-2 px-2 font-medium">{item.stock}</td><td className="py-2 px-2 text-gray-400">{ea?.stock || '-'}</td><td className="py-2 px-2 text-gray-400">{item.daily}/일</td>
-                  <td className="py-2 px-2"><span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${item.status==='긴급'?'bg-red-100 text-red-600':item.status==='주의'?'bg-amber-100 text-amber-600':item.status==='과잉'?'bg-blue-100 text-blue-600':'bg-green-100 text-green-600'}`}>{item.status}</span></td></motion.tr>
+                  <td className="py-2 px-2"><span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${item.status==='긴급'?'bg-[#C45C5C]/10 text-[#C45C5C]':item.status==='주의'?'bg-[#7A9B88]/10 text-[#7A9B88]':item.status==='과잉'?'bg-[#8EBAA4]/10 text-[#8EBAA4]':'bg-[#4A6355]/10 text-[#4A6355]'}`}>{item.status}</span></td></motion.tr>
               })}</tbody>
             </table>
           </div>
@@ -59,27 +59,27 @@ export default function LogisticsTeam() {
             <motion.div key={i} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35 + i * 0.05 }}
               className="flex items-center justify-between p-3 bg-gray-50/60 rounded-xl">
               <div><p className="text-[13px] font-medium text-gray-800">{item.product}</p><p className="text-[10px] text-gray-400">{item.reason}</p></div>
-              <span className="text-[13px] font-bold text-indigo-600"><CountUp end={item.qty}/>개</span>
+              <span className="text-[13px] font-bold text-[#4A6355]"><CountUp end={item.qty}/>개</span>
             </motion.div>
           ))}</div>
         </Card>
 
         <Card title="40ft HQ 컨테이너 적재 최적화" icon="🚢" delay={0.3}>
           <div className="flex items-center gap-6 mb-4">
-            <div className="text-center"><p className="text-3xl font-bold text-indigo-600"><CountUp end={containerData.fillRate} decimals={1}/>%</p><p className="text-[10px] text-gray-400">적재율</p></div>
+            <div className="text-center"><p className="text-3xl font-bold text-[#4A6355]"><CountUp end={containerData.fillRate} decimals={1}/>%</p><p className="text-[10px] text-gray-400">적재율</p></div>
             <div className="text-center"><p className="text-base font-semibold text-gray-600">{containerData.usedCBM} / {containerData.totalCBM}</p><p className="text-[10px] text-gray-400">CBM</p></div>
           </div>
           <div className="w-full h-6 bg-gray-100 rounded-xl overflow-hidden mb-4 relative">
             <motion.div initial={{ width: 0 }} animate={{ width: `${containerData.fillRate}%` }} transition={{ delay: 0.5, duration: 1.5 }}
-              className="h-full rounded-xl" style={{ background: 'linear-gradient(90deg, #818cf8, #6366f1)' }}/>
+              className="h-full rounded-xl" style={{ background: 'linear-gradient(90deg, #8EBAA4, #4A6355)' }}/>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {containerData.items.map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 + i * 0.12 }}
-                className="bg-indigo-50/60 rounded-xl p-3 text-center border border-indigo-100/50">
-                <p className="text-[10px] text-indigo-400 font-medium">{item.product}</p>
-                <p className="text-lg font-bold text-indigo-600"><CountUp end={item.qty}/>개</p>
-                <p className="text-[9px] text-indigo-300">{item.cbm} CBM · {item.boxes}박스</p>
+                className="bg-[#EFF4F1] rounded-xl p-3 text-center border border-[#C6D5CC]">
+                <p className="text-[10px] text-[#7A9B88] font-medium">{item.product}</p>
+                <p className="text-lg font-bold text-[#4A6355]"><CountUp end={item.qty}/>개</p>
+                <p className="text-[9px] text-[#C6D5CC]">{item.cbm} CBM · {item.boxes}박스</p>
               </motion.div>
             ))}
           </div>

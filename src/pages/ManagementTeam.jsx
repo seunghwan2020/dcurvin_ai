@@ -24,16 +24,16 @@ export default function ManagementTeam() {
         <Card title="매출 추이" icon="📈" delay={0.1}>
           <div className="flex gap-2 mb-4">
             {[{ id:'daily',l:'일별' },{id:'weekly',l:'주별'},{id:'monthly',l:'월별'}].map(t=>(
-              <button key={t.id} onClick={()=>setTab(t.id)} className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${tab===t.id?'text-white shadow-sm':'bg-gray-100 text-gray-400 hover:bg-gray-200'}`} style={tab===t.id?{background:'#C4A661'}:{}}>{t.l}</button>
+              <button key={t.id} onClick={()=>setTab(t.id)} className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${tab===t.id?'text-white shadow-sm':'bg-gray-100 text-gray-400 hover:bg-gray-200'}`} style={tab===t.id?{background:'#2A3B32'}:{}}>{t.l}</button>
             ))}
           </div>
           <ResponsiveContainer width="100%" height={240}>
             {tab==='daily'?(
-              <AreaChart data={dailySalesData}><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#C4A661" stopOpacity={0.2}/><stop offset="95%" stopColor="#C4A661" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="date" tick={{fontSize:10}}/><YAxis tick={{fontSize:10}} tickFormatter={v=>`${(v/1e6).toFixed(0)}M`}/><Tooltip formatter={v=>`₩${v.toLocaleString()}`}/><Area type="monotone" dataKey="sales" stroke="#C4A661" fill="url(#sg)" strokeWidth={2}/></AreaChart>
+              <AreaChart data={dailySalesData}><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#8EBAA4" stopOpacity={0.2}/><stop offset="95%" stopColor="#8EBAA4" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="date" tick={{fontSize:10}}/><YAxis tick={{fontSize:10}} tickFormatter={v=>`${(v/1e6).toFixed(0)}M`}/><Tooltip formatter={v=>`₩${v.toLocaleString()}`}/><Area type="monotone" dataKey="sales" stroke="#2A3B32" fill="url(#sg)" strokeWidth={2}/></AreaChart>
             ):tab==='weekly'?(
-              <BarChart data={weeklySalesData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="week" tick={{fontSize:11}}/><YAxis tick={{fontSize:10}} tickFormatter={v=>`${(v/1e6).toFixed(0)}M`}/><Tooltip formatter={v=>`₩${v.toLocaleString()}`}/><Bar dataKey="sales" fill="#C4A661" radius={[6,6,0,0]}/></BarChart>
+              <BarChart data={weeklySalesData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="week" tick={{fontSize:11}}/><YAxis tick={{fontSize:10}} tickFormatter={v=>`${(v/1e6).toFixed(0)}M`}/><Tooltip formatter={v=>`₩${v.toLocaleString()}`}/><Bar dataKey="sales" fill="#2A3B32" radius={[6,6,0,0]}/></BarChart>
             ):(
-              <BarChart data={monthlySalesData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="month" tick={{fontSize:10}}/><YAxis tick={{fontSize:10}} tickFormatter={v=>`${(v/1e6).toFixed(0)}M`}/><Tooltip formatter={v=>`₩${v.toLocaleString()}`}/><Bar dataKey="sales" fill="#C4A661" radius={[6,6,0,0]}/><Bar dataKey="profit" fill="#6366f1" radius={[6,6,0,0]}/></BarChart>
+              <BarChart data={monthlySalesData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="month" tick={{fontSize:10}}/><YAxis tick={{fontSize:10}} tickFormatter={v=>`${(v/1e6).toFixed(0)}M`}/><Tooltip formatter={v=>`₩${v.toLocaleString()}`}/><Bar dataKey="sales" fill="#2A3B32" radius={[6,6,0,0]}/><Bar dataKey="profit" fill="#4A6355" radius={[6,6,0,0]}/></BarChart>
             )}
           </ResponsiveContainer>
         </Card>
@@ -45,7 +45,7 @@ export default function ManagementTeam() {
           </Card>
           <Card title="컬러 트렌드 (밝은 vs 어두운)" icon="🎨" delay={0.2}>
             <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={colorTrendData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="month" tick={{fontSize:11}}/><YAxis tick={{fontSize:10}}/><Tooltip formatter={v=>`${v}%`}/><Area type="monotone" dataKey="bright" name="밝은색" stackId="1" stroke="#f59e0b" fill="#fef3c7"/><Area type="monotone" dataKey="dark" name="어두운색" stackId="1" stroke="#475569" fill="#cbd5e1"/></AreaChart>
+              <AreaChart data={colorTrendData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="month" tick={{fontSize:11}}/><YAxis tick={{fontSize:10}}/><Tooltip formatter={v=>`${v}%`}/><Area type="monotone" dataKey="bright" name="밝은색" stackId="1" stroke="#7A9B88" fill="#EFF4F1"/><Area type="monotone" dataKey="dark" name="어두운색" stackId="1" stroke="#4A6355" fill="#C6D5CC"/></AreaChart>
             </ResponsiveContainer>
           </Card>
         </div>
@@ -65,7 +65,7 @@ export default function ManagementTeam() {
         </Card>
         <Card title="매출 예측 (향후 30일)" icon="🔮" delay={0.3}>
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={salesForecastData}><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#6366f1" stopOpacity={0.15}/><stop offset="95%" stopColor="#6366f1" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="date" tick={{fontSize:10}}/><YAxis tick={{fontSize:10}} tickFormatter={v=>`${(v/1e6).toFixed(0)}M`}/><Tooltip formatter={v=>`₩${v.toLocaleString()}`}/><Area type="monotone" dataKey="upper" stroke="none" fill="#e0e7ff" fillOpacity={0.5} name="상한"/><Area type="monotone" dataKey="lower" stroke="none" fill="#ffffff" fillOpacity={1} name="하한"/><Line type="monotone" dataKey="predicted" stroke="#6366f1" strokeWidth={2} dot={false} name="예측"/></AreaChart>
+            <AreaChart data={salesForecastData}><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#4A6355" stopOpacity={0.15}/><stop offset="95%" stopColor="#4A6355" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="date" tick={{fontSize:10}}/><YAxis tick={{fontSize:10}} tickFormatter={v=>`${(v/1e6).toFixed(0)}M`}/><Tooltip formatter={v=>`₩${v.toLocaleString()}`}/><Area type="monotone" dataKey="upper" stroke="none" fill="rgba(142,186,164,0.15)" fillOpacity={0.5} name="상한"/><Area type="monotone" dataKey="lower" stroke="none" fill="#ffffff" fillOpacity={1} name="하한"/><Line type="monotone" dataKey="predicted" stroke="#4A6355" strokeWidth={2} dot={false} name="예측"/></AreaChart>
           </ResponsiveContainer>
           <p className="text-[10px] text-gray-300 text-center mt-2">* 음영 영역은 85% 신뢰구간</p>
         </Card>
@@ -73,9 +73,9 @@ export default function ManagementTeam() {
           <div className="space-y-2.5">
             {competitorData.map((r,i)=>(
               <motion.div key={r.name} initial={{opacity:0,x:-16}} animate={{opacity:1,x:0}} transition={{delay:0.4+i*0.07}}
-                className={`flex items-center gap-3 p-2 rounded-xl ${r.highlight?'bg-amber-50/60 border border-amber-200/40':''}`}>
+                className={`flex items-center gap-3 p-2 rounded-xl ${r.highlight?'bg-[#EFF4F1] border border-[#C6D5CC]':''}`}>
                 <span className="text-[12px] font-bold text-gray-400 w-5">#{r.rank}</span>
-                <span className={`text-[12px] flex-1 ${r.highlight?'font-bold':'text-gray-500'}`} style={r.highlight?{color:'#C4A661'}:{}}>{r.name}</span>
+                <span className={`text-[12px] flex-1 ${r.highlight?'font-bold':'text-gray-500'}`} style={r.highlight?{color:'#2A3B32'}:{}}>{r.name}</span>
                 <div className="w-28 h-3 bg-gray-100 rounded-full overflow-hidden">
                   <motion.div initial={{width:0}} animate={{width:`${(r.sales/320)*100}%`}} transition={{delay:0.5+i*0.07,duration:0.7}} className="h-full rounded-full" style={{backgroundColor:r.color}}/>
                 </div>

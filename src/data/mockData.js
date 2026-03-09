@@ -1,51 +1,77 @@
 // D.CURVIN CEO RPG — Mock Data
 
-// ── Characters ──
+// ── Characters (Sage Mineral palette) ──
 export const characters = {
-  yujin: { id: 'yujin', name: '김유진 과장', team: '경영지원팀', color: '#3b5998', questId: 'q1', title: '과장', fullName: '김유진' },
-  taehyun: { id: 'taehyun', name: '이태현 대리', team: '물류팀', color: '#e67e22', questId: 'q3', title: '대리', fullName: '이태현' },
-  seoyeon: { id: 'seoyeon', name: '박서연 사원', team: 'CS팀', color: '#e84393', questId: 'q2', title: '사원', fullName: '박서연' },
-  minjun: { id: 'minjun', name: '최민준 주임', team: '고객데이터분석팀', color: '#6c5ce7', questId: null, title: '주임', fullName: '최민준' },
-  haeun: { id: 'haeun', name: '정하은 대리', team: '비서팀', color: '#C4A661', questId: 'q5', title: '대리', fullName: '정하은' },
-  hanwei: { id: 'hanwei', name: '한웨이 매니저', team: '글로벌물류', color: '#2d8a4e', questId: null, title: '매니저', fullName: '한웨이' },
+  yujin: { id: 'yujin', name: '김유진 과장', team: '경영지원팀', color: '#4A6355', questId: 'q1', title: '과장', fullName: '김유진' },
+  taehyun: { id: 'taehyun', name: '이태현 대리', team: '물류팀', color: '#6B8A5E', questId: 'q3', title: '대리', fullName: '이태현' },
+  seoyeon: { id: 'seoyeon', name: '박서연 사원', team: 'CS팀', color: '#8EBAA4', questId: 'q2', title: '사원', fullName: '박서연' },
+  minjun: { id: 'minjun', name: '최민준 주임', team: '고객데이터분석팀', color: '#5B7A6A', questId: null, title: '주임', fullName: '최민준' },
+  haeun: { id: 'haeun', name: '정하은 대리', team: '비서팀', color: '#7A9B88', questId: 'q5', title: '대리', fullName: '정하은' },
+  hanwei: { id: 'hanwei', name: '한웨이 매니저', team: '글로벌물류', color: '#2A3B32', questId: null, title: '매니저', fullName: '한웨이' },
 }
 
-// ── 환율 데이터 ──
+// ── 위안화 환율 (CNY→KRW) ──
 export const exchangeRateData = {
-  current: 9.12,
-  previous: 9.05,
-  change: 0.77,
+  currency: 'CNY',
+  label: '위안화 (CNY→KRW)',
+  current: 192.5,
+  previous: 191.8,
+  change: 0.37,
   direction: 'up',
   weekly: [
-    { date: '3/3', rate: 8.98 },
-    { date: '3/4', rate: 9.02 },
-    { date: '3/5', rate: 8.95 },
-    { date: '3/6', rate: 9.08 },
-    { date: '3/7', rate: 9.05 },
-    { date: '3/8', rate: 9.10 },
-    { date: '3/9', rate: 9.12 },
+    { date: '3/3', rate: 190.2 },
+    { date: '3/4', rate: 191.0 },
+    { date: '3/5', rate: 190.8 },
+    { date: '3/6', rate: 192.1 },
+    { date: '3/7', rate: 191.8 },
+    { date: '3/8', rate: 192.3 },
+    { date: '3/9', rate: 192.5 },
   ],
 }
 
-// ── 최근 14일 매출 (미니차트용) ──
-export const recentDailySales = Array.from({ length: 14 }, (_, i) => {
-  const d = new Date(2026, 2, i - 4)
-  const base = 3_800_000 + Math.sin(i / 3) * 800_000
-  const isToday = i === 13
+// ── 최근 7일 매출 (미니차트용) ──
+export const recentDailySales = Array.from({ length: 7 }, (_, i) => {
+  const d = new Date(2026, 2, 3 + i)
+  const base = 3_800_000 + Math.sin(i / 2) * 800_000
+  const isToday = i === 6
   return { date: `${d.getMonth()+1}/${d.getDate()}`, sales: Math.round(base + (Math.random()-0.3)*400_000), isToday }
 })
 
-// ── 재고 현황 게이지 ──
+// ── N배송 품절 예상 ──
 export const inventoryGauge = {
-  totalSKU: 48,
-  depletionRate: 67.5,
+  totalSKU: 24,
   dangerItems: 3,
   dangerList: [
-    { name: 'Edge V2 네이비 M', daysLeft: 2.4 },
-    { name: 'Eddy V2 베이지 FREE', daysLeft: 2.0 },
-    { name: 'Eddy V2 아이보리 FREE', daysLeft: 4.0 },
+    { name: '엣지 V2 24인치 그레이+브라운', daysLeft: 2.4 },
+    { name: '에디 V2 20인치 실버+오렌지', daysLeft: 2.0 },
+    { name: '엣지 V2 20인치 실버+오렌지', daysLeft: 4.0 },
   ],
-  alertText: '3개 품목 5일 내 소진 예상',
+  alertText: '3개 품목 5일 내 N배송 품절 예상',
+}
+
+// ── 경쟁사 비교 (주간 추이) ──
+export const competitorWeeklyData = [
+  { week: 'W9', dcurvin: 27_500_000, compA: 31_000_000, compB: 22_000_000 },
+  { week: 'W10', dcurvin: 29_200_000, compA: 29_800_000, compB: 21_500_000 },
+  { week: 'W11', dcurvin: 31_500_000, compA: 30_200_000, compB: 23_000_000 },
+  { week: 'W12', dcurvin: 33_800_000, compA: 31_500_000, compB: 22_800_000 },
+]
+export const competitorInsight = 'D.CURVIN이 W12에 경쟁사 A를 추월하며 주간 매출 1위를 기록했습니다.'
+
+// ── 제품 & 공장 정보 ──
+export const productInfo = {
+  'Edge V2': {
+    factory: 'EMAY',
+    factoryLabel: 'EMAY (중국)',
+    sizes: ['20인치', '24인치', '26인치', '28인치'],
+    colors: ['실버+오렌지', '그레이+브라운', '실버+브라운', '화이트'],
+  },
+  'Eddy V2': {
+    factory: 'TUXIN',
+    factoryLabel: 'TUXIN (중국)',
+    sizes: ['20인치', '24인치', '26인치', '28인치'],
+    colors: ['실버+오렌지', '그레이+브라운'],
+  },
 }
 
 // ── 경영지원팀 (유진) ──
@@ -70,10 +96,10 @@ export const monthlySalesData = [
   { month: '2026.03', sales: 118_400_000, profit: 41_440_000 },
 ]
 export const productSalesShare = [
-  { name: 'Edge V2', value: 35, amount: 41_440_000, color: '#C4A661' },
-  { name: 'Eddy V2', value: 25, amount: 29_600_000, color: '#6366f1' },
-  { name: 'Guardian', value: 22, amount: 26_048_000, color: '#14b8a6' },
-  { name: 'ConnectBag', value: 18, amount: 21_312_000, color: '#f59e0b' },
+  { name: 'Edge V2', value: 35, amount: 41_440_000, color: '#2A3B32' },
+  { name: 'Eddy V2', value: 25, amount: 29_600_000, color: '#4A6355' },
+  { name: 'Guardian', value: 22, amount: 26_048_000, color: '#7A9B88' },
+  { name: 'ConnectBag', value: 18, amount: 21_312_000, color: '#8EBAA4' },
 ]
 export const colorTrendData = [
   { month: '10월', bright: 42, dark: 58 }, { month: '11월', bright: 45, dark: 55 },
@@ -92,11 +118,11 @@ export const salesForecastData = Array.from({ length: 30 }, (_, i) => {
   return { date: `${d.getMonth()+1}/${d.getDate()}`, predicted: Math.round(base), upper: Math.round(base*1.15), lower: Math.round(base*0.85) }
 })
 export const competitorData = [
-  { name: 'D.CURVIN', sales: 118, share: 8.2, rank: 4, color: '#C4A661', highlight: true },
-  { name: 'A사', sales: 320, share: 22.1, rank: 1, color: '#94a3b8' },
-  { name: 'B사', sales: 185, share: 12.8, rank: 2, color: '#94a3b8' },
-  { name: 'C사', sales: 142, share: 9.8, rank: 3, color: '#94a3b8' },
-  { name: 'D사', sales: 95, share: 6.6, rank: 5, color: '#94a3b8' },
+  { name: 'D.CURVIN', sales: 118, share: 8.2, rank: 4, color: '#2A3B32', highlight: true },
+  { name: 'A사', sales: 320, share: 22.1, rank: 1, color: '#7A9B88' },
+  { name: 'B사', sales: 185, share: 12.8, rank: 2, color: '#7A9B88' },
+  { name: 'C사', sales: 142, share: 9.8, rank: 3, color: '#7A9B88' },
+  { name: 'D사', sales: 95, share: 6.6, rank: 5, color: '#7A9B88' },
 ]
 export const managementDecisions = [
   { id: 'mgmt_1', question: '봄 시즌 마케팅 예산을 어떻게 배분할까요?', context: '밝은 컬러 매출 급상승 중, 전체 매출 상승세',
@@ -160,14 +186,14 @@ export const restockAlerts = [
   { sku: 'EDGE-V2-BK-M', name: 'Edge V2 블랙 M', daysLeft: 5.6, needed: 40, urgency: '주의' },
 ]
 export const depletionTimeline = [
-  { name: 'Eddy V2 베이지', days: 2, color: '#ef4444' },
-  { name: 'Edge V2 네이비 M', days: 2.4, color: '#ef4444' },
-  { name: 'Eddy V2 아이보리', days: 4, color: '#f59e0b' },
-  { name: 'Edge V2 블랙 M', days: 5.6, color: '#f59e0b' },
-  { name: 'Edge V2 블랙 L', days: 5.3, color: '#f59e0b' },
-  { name: 'Guardian 블랙 M', days: 13, color: '#22c55e' },
-  { name: 'Guardian 카키 L', days: 21.7, color: '#22c55e' },
-  { name: 'ConnectBag 그레이', days: 42.5, color: '#3b82f6' },
+  { name: 'Eddy V2 베이지', days: 2, color: '#C45C5C' },
+  { name: 'Edge V2 네이비 M', days: 2.4, color: '#C45C5C' },
+  { name: 'Eddy V2 아이보리', days: 4, color: '#7A9B88' },
+  { name: 'Edge V2 블랙 M', days: 5.6, color: '#7A9B88' },
+  { name: 'Edge V2 블랙 L', days: 5.3, color: '#7A9B88' },
+  { name: 'Guardian 블랙 M', days: 13, color: '#4A6355' },
+  { name: 'Guardian 카키 L', days: 21.7, color: '#4A6355' },
+  { name: 'ConnectBag 그레이', days: 42.5, color: '#8EBAA4' },
 ]
 export const oemRecommendation = [
   { product: 'Edge V2 블랙 M', qty: 500, reason: '주력 상품, 월 240개' },
@@ -223,9 +249,9 @@ export const logisticsDecisions = [
 
 // ── CS팀 (서연) ──
 export const csStatusData = [
-  { name: '답변완료', value: 32, color: '#22c55e' },
-  { name: '처리중', value: 7, color: '#f59e0b' },
-  { name: '미답변', value: 8, color: '#ef4444' },
+  { name: '답변완료', value: 32, color: '#4A6355' },
+  { name: '처리중', value: 7, color: '#7A9B88' },
+  { name: '미답변', value: 8, color: '#C45C5C' },
 ]
 export const unansweredCS = [
   { id: 'CS-0341', customer: '김*진', subject: '주문 취소 요청', category: '주문/결제', priority: 'high', hours: 26 },
@@ -430,13 +456,13 @@ export const importHistory = [
 ]
 export const pipelineData = { order: 2600, production: 2800, china: 1520, import: 1750, domestic: 2400, sales: 3200 }
 export const pipelineStages = [
-  { id: 'order', label: '발주 등록', count: 2600, icon: '📝', color: '#6366f1' },
-  { id: 'production', label: '제작 중', count: 2800, icon: '🏭', color: '#f59e0b' },
-  { id: 'china', label: '중국창고', count: 1520, icon: '🏬', color: '#2d8a4e' },
-  { id: 'import', label: '수입 준비', count: 1750, icon: '📋', color: '#8b5cf6' },
-  { id: 'shipping', label: '운송 중', count: 1750, icon: '🚢', color: '#0ea5e9' },
-  { id: 'domestic', label: '국내 입고', count: 2400, icon: '📦', color: '#14b8a6' },
-  { id: 'sales', label: '판매', count: 3200, icon: '🛍️', color: '#C4A661' },
+  { id: 'order', label: '발주 등록', count: 2600, icon: '📝', color: '#4A6355' },
+  { id: 'production', label: '제작 중', count: 2800, icon: '🏭', color: '#7A9B88' },
+  { id: 'china', label: '중국창고', count: 1520, icon: '🏬', color: '#2A3B32' },
+  { id: 'import', label: '수입 준비', count: 1750, icon: '📋', color: '#5B7A6A' },
+  { id: 'shipping', label: '운송 중', count: 1750, icon: '🚢', color: '#8EBAA4' },
+  { id: 'domestic', label: '국내 입고', count: 2400, icon: '📦', color: '#6B8A5E' },
+  { id: 'sales', label: '판매', count: 3200, icon: '🛍️', color: '#2A3B32' },
 ]
 // 제품별 CBM 참고 데이터 (컨테이너 시뮬레이터용)
 export const productCBM = {

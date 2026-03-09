@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion'
 
 const characters = {
-  yujin: { outfitColor: '#3b5998', outfitAccent: '#4a6fb5', accentColor: '#6b8cce', glowColor: '#3b599840' },
-  taehyun: { outfitColor: '#e67e22', outfitAccent: '#f39c12', accentColor: '#f5b041', glowColor: '#e67e2240' },
-  seoyeon: { outfitColor: '#e84393', outfitAccent: '#fd79a8', accentColor: '#fab1d0', glowColor: '#e8439340' },
-  minjun: { outfitColor: '#6c5ce7', outfitAccent: '#a29bfe', accentColor: '#b8b0fe', glowColor: '#6c5ce740' },
-  haeun: { outfitColor: '#C4A661', outfitAccent: '#d4b96e', accentColor: '#e8d5a0', glowColor: '#C4A66140' },
-  hanwei: { outfitColor: '#2d8a4e', outfitAccent: '#4ade80', accentColor: '#86efac', glowColor: '#2d8a4e40' },
+  yujin: { outfitColor: '#4A6355', outfitAccent: '#5B7A6A', accentColor: '#7A9B88', glowColor: '#4A635520' },
+  taehyun: { outfitColor: '#6B8A5E', outfitAccent: '#82A374', accentColor: '#9BBD8C', glowColor: '#6B8A5E20' },
+  seoyeon: { outfitColor: '#8EBAA4', outfitAccent: '#A5CBB8', accentColor: '#BFD9CE', glowColor: '#8EBAA420' },
+  minjun: { outfitColor: '#5B7A6A', outfitAccent: '#6E9380', accentColor: '#8AAB9A', glowColor: '#5B7A6A20' },
+  haeun: { outfitColor: '#7A9B88', outfitAccent: '#8EBAA4', accentColor: '#C6D5CC', glowColor: '#7A9B8820' },
+  hanwei: { outfitColor: '#2A3B32', outfitAccent: '#3D5446', accentColor: '#4A6355', glowColor: '#2A3B3220' },
 }
 
 /* Shared SVG defs for filters + gradients */

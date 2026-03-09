@@ -15,9 +15,9 @@ const msgs = [
   { text: '리뷰 감성 분석도 했어요. 전체 긍정률 72%, 평균 별점 4.3점입니다!' },
 ]
 const sentimentPie = [
-  { name: '긍정', value: reviewSentiment.positive, color: '#22c55e' },
-  { name: '중립', value: reviewSentiment.neutral, color: '#9ca3af' },
-  { name: '부정', value: reviewSentiment.negative, color: '#ef4444' },
+  { name: '긍정', value: reviewSentiment.positive, color: '#4A6355' },
+  { name: '중립', value: reviewSentiment.neutral, color: '#7A9B88' },
+  { name: '부정', value: reviewSentiment.negative, color: '#C45C5C' },
 ]
 
 function Heatmap({ labels, cols, colColors, data, delay = 0 }) {
@@ -32,7 +32,7 @@ function Heatmap({ labels, cols, colColors, data, delay = 0 }) {
       {data[pi].map((val, ci) => { const intensity = val / max; return <td key={ci} className="py-2 px-2 text-center">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: delay + pi * 0.04 + ci * 0.02 }}
           className="mx-auto w-9 h-9 rounded-lg flex items-center justify-center text-[11px] font-bold"
-          style={{ backgroundColor: val > 0 ? `rgba(196,166,97,${0.08 + intensity * 0.6})` : '#f9fafb', color: intensity > 0.5 ? 'white' : val > 0 ? '#C4A661' : '#d1d5db' }}>
+          style={{ backgroundColor: val > 0 ? `rgba(142,186,164,${0.08 + intensity * 0.6})` : '#f9fafb', color: intensity > 0.5 ? 'white' : val > 0 ? '#8EBAA4' : '#d1d5db' }}>
           {val || '-'}
         </motion.div>
       </td> })}</tr>)}</tbody></table></div>
@@ -50,7 +50,7 @@ export default function DataTeam() {
               <p className="text-[11px] text-gray-400 font-medium">{p.product}</p>
               <p className="text-xl font-bold text-gray-800 mt-1"><CountUp end={p.thisMonth} /></p>
               <p className="text-[9px] text-gray-300">이번 달</p>
-              <p className={`text-[11px] font-bold mt-1 ${p.growth > 0 ? 'text-emerald-500' : 'text-red-400'}`}>{p.growth > 0 ? '↑' : '↓'} {Math.abs(p.growth)}%</p>
+              <p className={`text-[11px] font-bold mt-1 ${p.growth > 0 ? 'text-[#4A6355]' : 'text-[#C45C5C]'}`}>{p.growth > 0 ? '↑' : '↓'} {Math.abs(p.growth)}%</p>
             </motion.div>
           ))}</div>
         </Card>
@@ -66,16 +66,16 @@ export default function DataTeam() {
 
         <Card title="고객 구매 패턴" icon="🔄" delay={0.25}>
           <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className="text-center p-3 bg-indigo-50/60 rounded-xl"><p className="text-xl font-bold text-indigo-600"><CountUp end={342} decimals={1}/>%</p><p className="text-[10px] text-gray-400">재구매율</p></div>
-            <div className="text-center p-3 bg-amber-50/60 rounded-xl"><p className="text-xl font-bold text-amber-600"><CountUp end={45}/>일</p><p className="text-[10px] text-gray-400">재구매 주기</p></div>
-            <div className="text-center p-3 bg-green-50/60 rounded-xl"><p className="text-xl font-bold text-green-600"><CountUp end={18} decimals={1}/>개</p><p className="text-[10px] text-gray-400">평균 구매량</p></div>
+            <div className="text-center p-3 bg-[#EFF4F1] rounded-xl"><p className="text-xl font-bold text-[#4A6355]"><CountUp end={342} decimals={1}/>%</p><p className="text-[10px] text-gray-400">재구매율</p></div>
+            <div className="text-center p-3 bg-[#EFF4F1] rounded-xl"><p className="text-xl font-bold text-[#7A9B88]"><CountUp end={45}/>일</p><p className="text-[10px] text-gray-400">재구매 주기</p></div>
+            <div className="text-center p-3 bg-[#EFF4F1] rounded-xl"><p className="text-xl font-bold text-[#4A6355]"><CountUp end={18} decimals={1}/>개</p><p className="text-[10px] text-gray-400">평균 구매량</p></div>
           </div>
           <p className="text-[11px] font-semibold text-gray-400 mb-2">인기 조합</p>
           {purchasePatterns.combos.map((combo, i) => <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 + i * 0.06 }} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-            <span className="text-[12px] text-gray-600">{combo.items}</span><span className="text-[12px] font-bold text-indigo-600">{combo.count}건 <span className="text-gray-300 font-normal">({combo.rate}%)</span></span>
+            <span className="text-[12px] text-gray-600">{combo.items}</span><span className="text-[12px] font-bold text-[#4A6355]">{combo.count}건 <span className="text-gray-300 font-normal">({combo.rate}%)</span></span>
           </motion.div>)}
           <p className="text-[11px] font-semibold text-gray-400 mt-4 mb-2">시간대별 주문</p>
-          <ResponsiveContainer width="100%" height={130}><BarChart data={purchasePatterns.timeDist}><XAxis dataKey="hour" tick={{fontSize:10}}/><YAxis tick={{fontSize:10}}/><Tooltip/><Bar dataKey="orders" name="주문" fill="#C4A661" radius={[4,4,0,0]}/></BarChart></ResponsiveContainer>
+          <ResponsiveContainer width="100%" height={130}><BarChart data={purchasePatterns.timeDist}><XAxis dataKey="hour" tick={{fontSize:10}}/><YAxis tick={{fontSize:10}}/><Tooltip/><Bar dataKey="orders" name="주문" fill="#8EBAA4" radius={[4,4,0,0]}/></BarChart></ResponsiveContainer>
         </Card>
 
         <Card title="리뷰 감성 분석" icon="💭" delay={0.3}>
@@ -83,14 +83,14 @@ export default function DataTeam() {
             <div className="flex-shrink-0"><ResponsiveContainer width={140} height={140}><PieChart><Pie data={sentimentPie} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={58} innerRadius={36} paddingAngle={3}>{sentimentPie.map((d,i)=><Cell key={i} fill={d.color}/>)}</Pie><Tooltip formatter={v=>`${v}%`}/></PieChart></ResponsiveContainer>
               <p className="text-[10px] text-gray-300 text-center">총 {reviewSentiment.total}건 · ⭐ {reviewSentiment.avg}</p></div>
             <div className="flex-1 space-y-3">
-              <div><p className="text-[11px] font-semibold text-emerald-600 mb-1">긍정 키워드</p><div className="flex flex-wrap gap-1">{reviewSentiment.posKeywords.map(k=><span key={k} className="px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-[10px] border border-green-200/50">{k}</span>)}</div></div>
-              <div><p className="text-[11px] font-semibold text-red-500 mb-1">부정 키워드</p><div className="flex flex-wrap gap-1">{reviewSentiment.negKeywords.map(k=><span key={k} className="px-2 py-0.5 bg-red-50 text-red-600 rounded-full text-[10px] border border-red-200/50">{k}</span>)}</div></div>
+              <div><p className="text-[11px] font-semibold text-[#4A6355] mb-1">긍정 키워드</p><div className="flex flex-wrap gap-1">{reviewSentiment.posKeywords.map(k=><span key={k} className="px-2 py-0.5 bg-[#EFF4F1] text-[#4A6355] rounded-full text-[10px] border border-[#C6D5CC]">{k}</span>)}</div></div>
+              <div><p className="text-[11px] font-semibold text-[#C45C5C] mb-1">부정 키워드</p><div className="flex flex-wrap gap-1">{reviewSentiment.negKeywords.map(k=><span key={k} className="px-2 py-0.5 bg-[#C45C5C]/10 text-[#C45C5C] rounded-full text-[10px] border border-[#C45C5C]/20">{k}</span>)}</div></div>
             </div>
           </div>
           <div className="mt-4 space-y-1.5"><p className="text-[11px] font-semibold text-gray-400 mb-1">제품별</p>
             {reviewSentiment.byProduct.map((p, i) => <motion.div key={p.product} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 + i * 0.04 }} className="flex items-center gap-2.5">
               <span className="text-[11px] text-gray-600 w-20">{p.product}</span>
-              <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden flex"><div className="h-full bg-green-400" style={{width:`${p.pos}%`}}/><div className="h-full bg-gray-300" style={{width:`${p.neu}%`}}/><div className="h-full bg-red-400" style={{width:`${p.neg}%`}}/></div>
+              <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden flex"><div className="h-full bg-[#4A6355]" style={{width:`${p.pos}%`}}/><div className="h-full bg-[#C6D5CC]" style={{width:`${p.neu}%`}}/><div className="h-full bg-[#C45C5C]" style={{width:`${p.neg}%`}}/></div>
               <span className="text-[10px] text-gray-400 w-10">⭐ {p.avg}</span>
             </motion.div>)}
           </div>

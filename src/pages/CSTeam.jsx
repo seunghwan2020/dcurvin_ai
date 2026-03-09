@@ -26,7 +26,7 @@ export default function CSTeam() {
             </div>
           </Card>
           <Card title="고객 만족도 트렌드" icon="😊" delay={0.15}>
-            <ResponsiveContainer width="100%" height={180}><LineChart data={satisfactionData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="month" tick={{fontSize:11}}/><YAxis domain={[3.5,5]} tick={{fontSize:10}}/><Tooltip/><Line type="monotone" dataKey="score" stroke="#e84393" strokeWidth={2} dot={{fill:'#e84393',r:4}} name="만족도"/></LineChart></ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={180}><LineChart data={satisfactionData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="month" tick={{fontSize:11}}/><YAxis domain={[3.5,5]} tick={{fontSize:10}}/><Tooltip/><Line type="monotone" dataKey="score" stroke="#8EBAA4" strokeWidth={2} dot={{fill:'#8EBAA4',r:4}} name="만족도"/></LineChart></ResponsiveContainer>
           </Card>
         </div>
 
@@ -36,21 +36,21 @@ export default function CSTeam() {
               className={`flex items-center justify-between p-3 rounded-xl border ${item.hours>=24?'bg-red-50/50 border-red-200/50':'bg-white/50 border-gray-100'}`}>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${item.priority==='high'?'bg-red-100 text-red-600':item.priority==='medium'?'bg-amber-100 text-amber-600':'bg-gray-100 text-gray-400'}`}>{item.priority==='high'?'긴급':item.priority==='medium'?'보통':'낮음'}</span>
+                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${item.priority==='high'?'bg-[#C45C5C]/10 text-[#C45C5C]':item.priority==='medium'?'bg-[#7A9B88]/10 text-[#7A9B88]':'bg-gray-100 text-gray-400'}`}>{item.priority==='high'?'긴급':item.priority==='medium'?'보통':'낮음'}</span>
                   <span className="text-[12px] font-medium text-gray-800">{item.subject}</span>
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5"><span className="text-[10px] text-gray-300">{item.id} · {item.customer} · {item.category}</span></div>
               </div>
               <div className="text-right">
-                <p className={`text-[12px] font-bold ${item.hours>=24?'text-red-500':'text-gray-400'}`}>{item.hours}h</p>
-                {item.hours>=24 && <motion.span animate={{opacity:[1,0.3,1]}} transition={{repeat:Infinity,duration:1}} className="text-[9px] text-red-400 font-medium">⚠️ 초과</motion.span>}
+                <p className={`text-[12px] font-bold ${item.hours>=24?'text-[#C45C5C]':'text-gray-400'}`}>{item.hours}h</p>
+                {item.hours>=24 && <motion.span animate={{opacity:[1,0.3,1]}} transition={{repeat:Infinity,duration:1}} className="text-[9px] text-[#C45C5C] font-medium">⚠️ 초과</motion.span>}
               </div>
             </motion.div>
           ))}</div>
         </Card>
 
         <Card title="클레임/반품 현황" icon="📉" delay={0.25}>
-          <ResponsiveContainer width="100%" height={220}><BarChart data={claimData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="month" tick={{fontSize:11}}/><YAxis tick={{fontSize:10}}/><Tooltip/><Legend wrapperStyle={{fontSize:'11px'}}/><Bar dataKey="claims" name="클레임" fill="#ef4444" radius={[4,4,0,0]}/><Bar dataKey="returns" name="반품" fill="#f59e0b" radius={[4,4,0,0]}/><Bar dataKey="refunds" name="환불" fill="#8b5cf6" radius={[4,4,0,0]}/></BarChart></ResponsiveContainer>
+          <ResponsiveContainer width="100%" height={220}><BarChart data={claimData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="month" tick={{fontSize:11}}/><YAxis tick={{fontSize:10}}/><Tooltip/><Legend wrapperStyle={{fontSize:'11px'}}/><Bar dataKey="claims" name="클레임" fill="#C45C5C" radius={[4,4,0,0]}/><Bar dataKey="returns" name="반품" fill="#7A9B88" radius={[4,4,0,0]}/><Bar dataKey="refunds" name="환불" fill="#4A6355" radius={[4,4,0,0]}/></BarChart></ResponsiveContainer>
         </Card>
 
         <ExecutionChecklist items={executionChecklists.cs} delay={0.3} />

@@ -37,9 +37,9 @@ export default function SecretaryTeam() {
         <Card title="오늘의 핵심 의사결정" icon="⚡" delay={0.1}>
           <div className="space-y-2">{keyDecisions.map((d, i) => (
             <motion.div key={d.id} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 + i * 0.07 }}
-              className={`flex items-center justify-between p-3 rounded-xl border ${d.urgency === 'high' ? 'bg-red-50/50 border-red-200/50' : d.urgency === 'medium' ? 'bg-amber-50/50 border-amber-200/50' : 'bg-gray-50/50 border-gray-100'}`}>
+              className={`flex items-center justify-between p-3 rounded-xl border ${d.urgency === 'high' ? 'bg-red-50/50 border-red-200/50' : d.urgency === 'medium' ? 'bg-[#EFF4F1] border-[#C6D5CC]' : 'bg-gray-50/50 border-gray-100'}`}>
               <div><p className="text-[13px] font-medium text-gray-800">{d.title}</p><p className="text-[10px] text-gray-400">마감: {d.deadline}</p></div>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${d.status === '미결정' ? 'bg-red-100 text-red-600' : d.status === '검토중' ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'}`}>{d.status}</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${d.status === '미결정' ? 'bg-[#C45C5C]/10 text-[#C45C5C]' : d.status === '검토중' ? 'bg-[#7A9B88]/10 text-[#7A9B88]' : 'bg-[#8EBAA4]/10 text-[#8EBAA4]'}`}>{d.status}</span>
             </motion.div>
           ))}</div>
         </Card>
@@ -49,14 +49,14 @@ export default function SecretaryTeam() {
             <div className="space-y-2">
               {reminders.map((r, i) => (
                 <motion.div key={r.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.05 }}
-                  className="flex items-center justify-between p-3 rounded-xl bg-amber-50/50 border border-amber-200/40">
+                  className="flex items-center justify-between p-3 rounded-xl bg-[#EFF4F1] border border-[#C6D5CC]">
                   <div>
-                    <p className="text-[12px] font-medium text-amber-800">{r.text}</p>
-                    <p className="text-[10px] text-amber-500">{r.team} · {r.due}</p>
+                    <p className="text-[12px] font-medium text-[#2A3B32]">{r.text}</p>
+                    <p className="text-[10px] text-[#7A9B88]">{r.team} · {r.due}</p>
                   </div>
                   <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                     onClick={() => dismissReminder(r.id)}
-                    className="px-2 py-1 rounded-lg text-[10px] font-medium text-amber-600 bg-amber-100/60 hover:bg-amber-200/60">확인</motion.button>
+                    className="px-2 py-1 rounded-lg text-[10px] font-medium text-[#4A6355] bg-[#C6D5CC]/40 hover:bg-[#C6D5CC]/60">확인</motion.button>
                 </motion.div>
               ))}
             </div>
@@ -67,8 +67,8 @@ export default function SecretaryTeam() {
           <Card title="메일/알림 요약" icon="📧" delay={0.15}>
             <div className="space-y-1.5">{mailSummary.map((m, i) => (
               <motion.div key={m.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 + i * 0.04 }}
-                className={`flex items-start gap-2.5 p-2 rounded-xl ${!m.read ? 'bg-blue-50/50 border border-blue-100/50' : 'hover:bg-gray-50/30'}`}>
-                <div className="mt-1.5">{!m.read ? <div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> : <div className="w-1.5 h-1.5" />}</div>
+                className={`flex items-start gap-2.5 p-2 rounded-xl ${!m.read ? 'bg-[#EFF4F1] border border-[#C6D5CC]' : 'hover:bg-gray-50/30'}`}>
+                <div className="mt-1.5">{!m.read ? <div className="w-1.5 h-1.5 rounded-full bg-[#2A3B32]" /> : <div className="w-1.5 h-1.5" />}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5"><span className="text-[10px] text-gray-400">{m.from}</span>{m.important && <span className="text-[8px] text-red-400">⭐</span>}<span className="text-[9px] text-gray-300 ml-auto">{m.time}</span></div>
                   <p className={`text-[12px] truncate ${!m.read ? 'font-semibold text-gray-800' : 'text-gray-500'}`}>{m.subject}</p>
@@ -93,32 +93,32 @@ export default function SecretaryTeam() {
           <div className="flex flex-wrap gap-1.5 mb-3">
             <button onClick={() => setFilter('all')}
               className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all ${filter === 'all' ? 'text-white shadow-sm' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-              style={filter === 'all' ? { background: '#C4A661' } : {}}>전체 ({todos.length})</button>
+              style={filter === 'all' ? { background: '#2A3B32' } : {}}>전체 ({todos.length})</button>
             {teams.map(team => {
               const count = todos.filter(t => t.team === team).length
               return <button key={team} onClick={() => setFilter(team)}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all ${filter === team ? 'text-white shadow-sm' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                style={filter === team ? { background: '#C4A661' } : {}}>{team} ({count})</button>
+                style={filter === team ? { background: '#2A3B32' } : {}}>{team} ({count})</button>
             })}
           </div>
           <div className="flex gap-2 mb-3">
             <input type="text" value={newTodo} onChange={e => setNewTodo(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddTodo()}
-              placeholder="새 할 일 추가..." className="flex-1 px-3 py-2 bg-gray-50/60 border border-gray-200/60 rounded-xl text-[12px] focus:outline-none focus:ring-2 focus:ring-[#C4A661]/20 focus:border-[#C4A661]/40" />
+              placeholder="새 할 일 추가..." className="flex-1 px-3 py-2 bg-gray-50/60 border border-gray-200/60 rounded-xl text-[12px] focus:outline-none focus:ring-2 focus:ring-[#8EBAA4]/20 focus:border-[#8EBAA4]/40" />
             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={handleAddTodo}
-              className="px-4 py-2 rounded-xl text-[12px] font-semibold text-white shadow-sm" style={{ background: '#C4A661' }}>추가</motion.button>
+              className="px-4 py-2 rounded-xl text-[12px] font-semibold text-white shadow-sm" style={{ background: '#2A3B32' }}>추가</motion.button>
           </div>
           <AnimatePresence>{filteredTodos.map(todo => (
             <motion.div key={todo.id} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0, x: -60 }}
               className="flex items-center gap-2.5 py-2 border-b border-gray-50 last:border-0">
               <motion.button whileTap={{ scale: 0.8 }} onClick={() => toggleTodo(todo.id)}
-                className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${todo.done ? 'bg-emerald-400 border-emerald-400' : 'border-gray-200 hover:border-[#C4A661]'}`}>
+                className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${todo.done ? 'bg-[#8EBAA4] border-[#8EBAA4]' : 'border-gray-200 hover:border-[#8EBAA4]'}`}>
                 {todo.done && <span className="text-white text-[7px]">✓</span>}
               </motion.button>
               <div className="flex-1 min-w-0">
                 <span className={`text-[12px] ${todo.done ? 'line-through text-gray-300' : 'text-gray-600'}`}>{todo.text}</span>
                 {todo.team && <span className="ml-1.5 text-[9px] text-gray-300 bg-gray-50 px-1.5 py-0.5 rounded">{todo.team}</span>}
               </div>
-              <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${todo.priority === 'high' ? 'bg-red-100 text-red-500' : todo.priority === 'medium' ? 'bg-amber-100 text-amber-500' : 'bg-gray-100 text-gray-400'}`}>{todo.due}</span>
+              <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${todo.priority === 'high' ? 'bg-[#C45C5C]/10 text-[#C45C5C]' : todo.priority === 'medium' ? 'bg-[#7A9B88]/10 text-[#7A9B88]' : 'bg-gray-100 text-gray-400'}`}>{todo.due}</span>
               <motion.button whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.8 }} onClick={() => removeTodo(todo.id)} className="text-gray-200 hover:text-red-400 text-[11px]">✕</motion.button>
             </motion.div>
           ))}</AnimatePresence>

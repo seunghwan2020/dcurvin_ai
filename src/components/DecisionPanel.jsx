@@ -14,26 +14,28 @@ export default function DecisionPanel({ decision, characterColor, onDecisionMade
     const choice = decision.choices.find(c => c.id === already.choiceId)
     return (
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-white/60 backdrop-blur-xl rounded-2xl border border-white/50 p-5">
-        <p className="text-[11px] text-gray-400 mb-1">결정 완료</p>
-        <p className="text-[13px] text-gray-600 mb-3">✅ {choice?.text} <span className="text-amber-500 font-bold">+{choice?.exp} EXP</span></p>
+        className="bg-white/70 backdrop-blur-xl rounded-2xl border p-5"
+        style={{ borderColor: 'rgba(198,213,204,0.5)' }}>
+        <p className="text-[12px] mb-1" style={{ color: '#7A9B88' }}>결정 완료</p>
+        <p className="text-[13px] mb-3" style={{ color: '#4A6355' }}>✅ {choice?.text} <span className="font-semibold tabular-nums" style={{ color: '#8EBAA4' }}>+{choice?.exp} EXP</span></p>
         {choice?.actions && choice.actions.length > 0 && (
-          <div className="mt-2 pt-3 border-t border-gray-100/60">
-            <p className="text-[10px] font-semibold text-[#C4A661] mb-2">📋 생성된 할 일 ({choice.actions.length}건 → 비서팀 하은 관리)</p>
+          <div className="mt-2 pt-3" style={{ borderTop: '1px solid rgba(198,213,204,0.3)' }}>
+            <p className="text-[11px] font-semibold mb-2" style={{ color: '#8EBAA4' }}>📋 생성된 할 일 ({choice.actions.length}건)</p>
             <div className="space-y-1">
               {choice.actions.map((a, i) => (
-                <div key={i} className="flex items-center gap-2 text-[11px] text-gray-500">
-                  <span className="text-emerald-400">✓</span>
+                <div key={i} className="flex items-center gap-2 text-[12px]" style={{ color: '#4A6355' }}>
+                  <span style={{ color: '#8EBAA4' }}>✓</span>
                   <span>{a.text}</span>
-                  <span className={`ml-auto px-1.5 py-0.5 rounded text-[9px] font-medium ${a.priority === 'high' ? 'bg-red-50 text-red-400' : a.priority === 'medium' ? 'bg-amber-50 text-amber-400' : 'bg-gray-50 text-gray-300'}`}>{a.due}</span>
+                  <span className={`ml-auto px-1.5 py-0.5 rounded text-[10px] font-medium ${a.priority === 'high' ? 'text-[#C45C5C]' : 'text-[#7A9B88]'}`}
+                    style={{ background: a.priority === 'high' ? 'rgba(196,92,92,0.08)' : 'rgba(142,186,164,0.08)' }}>{a.due}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
         {choice?.reminder && (
-          <div className="mt-2 pt-2 border-t border-gray-100/60">
-            <p className="text-[10px] text-amber-500">⏰ 리마인더: {choice.reminder.text} ({choice.reminder.due})</p>
+          <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(198,213,204,0.3)' }}>
+            <p className="text-[11px]" style={{ color: '#7A9B88' }}>⏰ 리마인더: {choice.reminder.text} ({choice.reminder.due})</p>
           </div>
         )}
       </motion.div>
@@ -41,128 +43,73 @@ export default function DecisionPanel({ decision, characterColor, onDecisionMade
   }
 
   const handleSelect = (choice) => {
-    setSelected(choice)
-    setShowResult(true)
+    setSelected(choice); setShowResult(true)
     makeDecision(decision.id, choice)
-    if (choice.navigateTo) {
-      setTimeout(() => navigate(`/${choice.navigateTo}`), 3000)
-    }
+    if (choice.navigateTo) setTimeout(() => navigate(`/${choice.navigateTo}`), 3000)
     setTimeout(() => onDecisionMade?.(choice), 2500)
   }
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-white/80 backdrop-blur-2xl rounded-2xl border border-white/60 shadow-[0_4px_24px_rgba(0,0,0,0.06)] p-5">
-      <p className="text-[13px] font-semibold text-gray-800 mb-1">{decision.question}</p>
-      <p className="text-[11px] text-gray-400 mb-4">{decision.context}</p>
+      className="bg-white/80 backdrop-blur-xl rounded-2xl border p-5"
+      style={{ borderColor: 'rgba(198,213,204,0.5)', boxShadow: '0 2px 16px rgba(42,59,50,0.04)' }}>
+      <p className="text-[14px] font-semibold mb-1" style={{ color: '#2A3B32' }}>{decision.question}</p>
+      <p className="text-[12px] mb-4" style={{ color: '#7A9B88' }}>{decision.context}</p>
       <AnimatePresence mode="wait">
         {!showResult ? (
           <motion.div key="choices" className="space-y-2">
             {decision.choices.map((choice, i) => (
               <motion.button key={choice.id}
-                initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.08 }}
-                whileHover={{ scale: 1.01, boxShadow: `0 0 24px ${characterColor}20` }}
-                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}
+                whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
                 onClick={() => handleSelect(choice)}
-                className="w-full text-left p-4 rounded-xl bg-white/90 border border-gray-100 hover:border-[#C4A661]/40 transition-all group">
+                className="w-full text-left p-4 rounded-xl border transition-all group"
+                style={{ background: 'rgba(255,255,255,0.7)', borderColor: 'rgba(198,213,204,0.4)' }}>
                 <div className="flex justify-between items-center">
-                  <span className="text-[13px] text-gray-700 group-hover:text-gray-900 font-medium">{choice.text}</span>
-                  <span className="text-[11px] text-amber-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity">+{choice.exp} EXP</span>
+                  <span className="text-[13px] font-medium" style={{ color: '#2A3B32' }}>{choice.text}</span>
+                  <span className="text-[11px] font-semibold tabular-nums opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#8EBAA4' }}>+{choice.exp} EXP</span>
                 </div>
-                <p className="text-[11px] text-gray-400 mt-0.5">{choice.effect}</p>
-                {choice.actions && (
-                  <p className="text-[9px] text-[#C4A661] mt-1 opacity-0 group-hover:opacity-100 transition-opacity">→ {choice.actions.length}건의 할 일이 자동 생성됩니다</p>
-                )}
-                {choice.reminder && (
-                  <p className="text-[9px] text-amber-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">→ 리마인더가 설정됩니다</p>
-                )}
-                {choice.navigateTo && (
-                  <p className="text-[9px] text-indigo-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">→ 관련 데이터 상세 뷰로 이동</p>
-                )}
+                <p className="text-[12px] mt-0.5" style={{ color: '#7A9B88' }}>{choice.effect}</p>
+                {choice.actions && <p className="text-[10px] mt-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#8EBAA4' }}>→ {choice.actions.length}건의 할 일이 자동 생성됩니다</p>}
+                {choice.reminder && <p className="text-[10px] mt-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#7A9B88' }}>→ 리마인더가 설정됩니다</p>}
               </motion.button>
             ))}
           </motion.div>
         ) : (
-          <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-4 relative overflow-hidden">
-            {/* Skill cast radial burst */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.3 }}
-              animate={{ opacity: [0, 0.5, 0], scale: [0.3, 2, 2.5] }}
-              transition={{ duration: 1 }}
-              className="absolute inset-0 pointer-events-none"
-              style={{ background: `radial-gradient(circle, ${characterColor}30 0%, transparent 60%)` }}
-            />
-            {/* Magic circle */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0, rotate: 0 }}
-              animate={{ opacity: [0, 0.6, 0], scale: [0, 1.5, 2], rotate: 180 }}
-              transition={{ duration: 1.5 }}
-              className="absolute left-1/2 top-8 -translate-x-1/2 w-32 h-32 rounded-full pointer-events-none"
-              style={{ border: `2px solid ${characterColor}40`, boxShadow: `0 0 30px ${characterColor}20` }}
-            />
-            {/* Sparkle particles */}
-            {Array.from({ length: 12 }).map((_, i) => {
-              const angle = (i / 12) * Math.PI * 2
-              return (
-                <motion.div key={i}
-                  className="absolute w-1 h-1 rounded-full"
-                  style={{ left: '50%', top: '40px', background: i % 2 === 0 ? '#f0d875' : characterColor }}
-                  initial={{ opacity: 1, x: 0, y: 0 }}
-                  animate={{ opacity: 0, x: Math.cos(angle) * 80, y: Math.sin(angle) * 80 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                />
-              )
-            })}
+          <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-4 relative overflow-hidden">
+            <motion.div initial={{ opacity: 0, scale: 0.3 }} animate={{ opacity: [0, 0.3, 0], scale: [0.3, 2, 2.5] }}
+              transition={{ duration: 1 }} className="absolute inset-0 pointer-events-none"
+              style={{ background: `radial-gradient(circle, ${characterColor}20 0%, transparent 60%)` }} />
             <div className="text-center mb-4 relative z-10">
-              <motion.div initial={{ scale: 0, rotate: -30 }} animate={{ scale: [0, 1.6, 1], rotate: [0, 15, 0] }}
-                transition={{ type: 'spring', damping: 8 }}
-                className="w-14 h-14 mx-auto mb-3 rounded-2xl flex items-center justify-center"
-                style={{
-                  background: `linear-gradient(135deg, ${characterColor} 0%, ${characterColor}cc 100%)`,
-                  boxShadow: `0 4px 20px ${characterColor}40, inset 0 1px 0 rgba(255,255,255,0.3)`,
-                }}>
-                <span className="text-2xl">⚡</span>
+              <motion.div initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} transition={{ type: 'spring', damping: 8 }}
+                className="w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(142,186,164,0.15)' }}>
+                <span className="text-xl">⚡</span>
               </motion.div>
-              <p className="text-[13px] font-semibold text-gray-800">{selected.text}</p>
-              {/* EXP with coin fly */}
-              <div className="relative inline-block">
-                <motion.p initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: 'spring' }}
-                  className="text-xl font-black mt-2" style={{ color: '#C4A661' }}>+{selected.exp} EXP!</motion.p>
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <motion.span key={i}
-                    className="absolute text-sm animate-coin-fly"
-                    style={{ left: '50%', top: '0', animationDelay: `${i * 0.2}s` }}>
-                    🪙
-                  </motion.span>
-                ))}
-              </div>
-              <p className="text-[11px] text-gray-400 mt-1">{selected.effect}</p>
+              <p className="text-[14px] font-semibold" style={{ color: '#2A3B32' }}>{selected.text}</p>
+              <motion.p initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: 'spring' }}
+                className="text-xl font-semibold mt-2 tabular-nums" style={{ color: '#8EBAA4' }}>+{selected.exp} EXP!</motion.p>
+              <p className="text-[12px] mt-1" style={{ color: '#7A9B88' }}>{selected.effect}</p>
             </div>
             {selected.actions && selected.actions.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-                className="mt-3 p-3 bg-emerald-50/60 rounded-xl border border-emerald-200/40">
-                <p className="text-[11px] font-semibold text-emerald-700 mb-2">📋 할 일 목록에 추가됨</p>
+                className="mt-3 p-3 rounded-xl border" style={{ background: 'rgba(142,186,164,0.06)', borderColor: 'rgba(142,186,164,0.2)' }}>
+                <p className="text-[11px] font-semibold mb-2" style={{ color: '#4A6355' }}>📋 할 일 목록에 추가됨</p>
                 {selected.actions.map((a, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 + i * 0.08 }}
-                    className="flex items-center gap-2 py-1 text-[11px] text-emerald-800">
-                    <span className="w-4 h-4 rounded-full bg-emerald-200 flex items-center justify-center text-[8px] text-emerald-600 flex-shrink-0">✓</span>
+                    className="flex items-center gap-2 py-1 text-[12px]" style={{ color: '#4A6355' }}>
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] text-white flex-shrink-0" style={{ background: '#8EBAA4' }}>✓</span>
                     <span>{a.text}</span>
                   </motion.div>
                 ))}
-                <p className="text-[9px] text-emerald-500 mt-2">→ 비서팀 하은이 관리합니다</p>
               </motion.div>
             )}
             {selected.reminder && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
-                className="mt-3 p-3 bg-amber-50/60 rounded-xl border border-amber-200/40">
-                <p className="text-[11px] font-semibold text-amber-700">⏰ 리마인더 설정됨</p>
-                <p className="text-[11px] text-amber-600 mt-1">{selected.reminder.text} — {selected.reminder.due}</p>
+                className="mt-3 p-3 rounded-xl border" style={{ background: 'rgba(122,155,136,0.06)', borderColor: 'rgba(122,155,136,0.2)' }}>
+                <p className="text-[11px] font-semibold" style={{ color: '#4A6355' }}>⏰ 리마인더 설정됨</p>
+                <p className="text-[12px] mt-1" style={{ color: '#7A9B88' }}>{selected.reminder.text} — {selected.reminder.due}</p>
               </motion.div>
-            )}
-            {selected.navigateTo && (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-                className="text-[10px] text-indigo-500 text-center mt-3">🔍 관련 데이터 페이지로 이동합니다...</motion.p>
             )}
           </motion.div>
         )}
