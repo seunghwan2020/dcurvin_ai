@@ -1,35 +1,40 @@
 @import "tailwindcss";
 
-@theme {
-  --color-primary: #1e3a5f;
-  --color-primary-light: #2c5282;
-  --color-accent: #e8a87c;
-  --color-accent-dark: #d4956a;
-  --color-success: #38a169;
-  --color-warning: #d69e2e;
-  --color-danger: #e53e3e;
-  --color-info: #3182ce;
-  --color-bg: #f7fafc;
-  --color-card: #ffffff;
-  --color-text: #1a202c;
-  --color-text-secondary: #718096;
-  --color-border: #e2e8f0;
-}
-
 body {
   margin: 0;
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: var(--color-bg);
-  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 50%, #f3f4f6 100%);
+  color: #1a202c;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e0;
-  border-radius: 3px;
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+/* Glow animation for decision buttons */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(196, 166, 97, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(196, 166, 97, 0.4); }
+}
+
+/* Shake animation for negative KPI */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+/* Alert pulse for urgent items */
+@keyframes alert-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
