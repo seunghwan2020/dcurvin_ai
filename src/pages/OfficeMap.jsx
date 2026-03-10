@@ -12,7 +12,7 @@ import { characters, recentDailySales as mockRecentSales, inventoryGauge as mock
 import { useGame } from '../context/GameContext'
 import { useApiData } from '../hooks/useApiData'
 import { useExchangeRate } from '../hooks/useExchangeRate'
-import { useRankingData, useCompetitorsData, formatManwon, getRankBadge } from '../hooks/useRankingData'
+import { formatManwon, getRankBadge } from '../hooks/useRankingData'
 
 const teamCards = [
   { id: 'yujin', path: '/management', preview: '이번 달 매출 1.18억 · 전월비 +12.8%' },
@@ -31,46 +31,50 @@ function TitleBadge({ title, color }) {
   )
 }
 
-/* ── 위안화 환율 위젯 — LIVE API ── */
+/* ── 위안화 환율 위젯 — LIVE API with dual fallback ── */
 function ExchangeWidget() {
   const { data, loading } = useExchangeRate()
 
   if (loading || !data) {
     return (
-      <Card title="위안화 (CNY→KRW)" icon="💱" delay={0.25}>
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl border p-4"
+        style={{ borderColor: 'rgba(198,213,204,0.5)' }}>
         <div className="animate-pulse space-y-2">
-          <div className="h-7 bg-[#C6D5CC]/30 rounded w-24" />
+          <div className="h-4 bg-[#C6D5CC]/30 rounded w-28" />
+          <div className="h-7 bg-[#C6D5CC]/30 rounded w-20" />
           <div className="h-3 bg-[#C6D5CC]/20 rounded w-32" />
-          <div className="h-12 bg-[#C6D5CC]/15 rounded w-full" />
         </div>
-      </Card>
+      </div>
     )
   }
 
-  const { label, current, previous, change, direction, weekly, isLive } = data
+  const { label, current, previous, change, direction, weekly, isLive, lastUpdateLabel, fetchFailed } = data
   return (
-    <Card title={label} icon="💱" delay={0.25}>
-      <div className="flex items-end justify-between mb-2">
-        <div>
-          <div className="flex items-center gap-2">
-            <p className="text-2xl font-semibold tabular-nums" style={{ color: '#2A3B32' }}>₩<CountUp end={current} decimals={1} /></p>
-            {!isLive && <span className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#C6D5CC]/20" style={{ color: '#7A9B88' }}>추정</span>}
-          </div>
-          <p className="text-[12px] font-medium" style={{ color: direction === 'up' ? '#C45C5C' : '#4A6355' }}>
-            {direction === 'up' ? '▲' : '▼'} {change}% <span style={{ color: '#7A9B88' }}>전일 ₩{previous}</span>
-          </p>
-        </div>
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+      className="bg-white/80 backdrop-blur-xl rounded-2xl border p-4"
+      style={{ borderColor: 'rgba(198,213,204,0.5)', boxShadow: '0 1px 12px rgba(42,59,50,0.04)' }}>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[11px] font-medium" style={{ color: '#7A9B88' }}>💱 {label}</span>
+        {fetchFailed && <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#C45C5C]/10 text-[#C45C5C]">업데이트 실패</span>}
       </div>
-      <ResponsiveContainer width="100%" height={50}>
-        <LineChart data={weekly}>
-          <Line type="monotone" dataKey="rate" stroke={direction === 'up' ? '#C45C5C' : '#4A6355'} strokeWidth={2} dot={false} />
-          <Tooltip formatter={v => `₩${Number(v).toFixed(1)}`} contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #C6D5CC' }} />
-        </LineChart>
-      </ResponsiveContainer>
-      <div className="flex justify-between text-[10px] mt-1" style={{ color: '#7A9B88' }}>
-        {weekly.map(d => <span key={d.date}>{d.date}</span>)}
+      <div className="flex items-end gap-2 mb-1">
+        <p className="text-xl font-semibold tabular-nums" style={{ color: '#2A3B32' }}>₩<CountUp end={current} decimals={1} /></p>
+        <p className="text-[11px] font-medium pb-0.5" style={{ color: direction === 'up' ? '#C45C5C' : '#4A6355' }}>
+          {direction === 'up' ? '▲' : '▼'} {change}%
+        </p>
       </div>
-    </Card>
+      {weekly.length > 0 && (
+        <ResponsiveContainer width="100%" height={36}>
+          <LineChart data={weekly}>
+            <Line type="monotone" dataKey="rate" stroke={direction === 'up' ? '#C45C5C' : '#4A6355'} strokeWidth={1.5} dot={false} />
+            <Tooltip formatter={v => `₩${Number(v).toFixed(1)}`} contentStyle={{ fontSize: '11px', borderRadius: '6px', border: '1px solid #C6D5CC', padding: '4px 8px' }} />
+          </LineChart>
+        </ResponsiveContainer>
+      )}
+      <p className="text-[9px] mt-1" style={{ color: '#C6D5CC' }}>
+        {lastUpdateLabel || `전일 ₩${previous}`}
+      </p>
+    </motion.div>
   )
 }
 
@@ -107,8 +111,8 @@ function InventoryWidget({ inventoryData }) {
       <div className="flex items-center gap-3 mb-3">
         <motion.span animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}
           className="px-2.5 py-1 rounded-full text-[11px] font-semibold"
-          style={{ background: 'rgba(196,92,92,0.08)', color: '#C45C5C' }}>
-          위험 {dangerItems}개
+          style={{ background: dangerItems > 0 ? 'rgba(196,92,92,0.08)' : 'rgba(142,186,164,0.1)', color: dangerItems > 0 ? '#C45C5C' : '#4A6355' }}>
+          {dangerItems > 0 ? `위험 ${dangerItems}개` : '안정'}
         </motion.span>
         <p className="text-[12px]" style={{ color: '#4A6355' }}>{alertText}</p>
       </div>
@@ -125,15 +129,13 @@ function InventoryWidget({ inventoryData }) {
 }
 
 /* ── 당일 매출 순위 테이블 ── */
-function RankingTable() {
-  const { data: rankingData, loading, error } = useRankingData()
-
+function RankingTable({ rankingData, loading }) {
   if (loading) {
     return <SkeletonCard title="당일 매출 순위" icon="🏆" height={200} lines={5} delay={0.55} />
   }
 
-  if (error || !rankingData || !rankingData.length) {
-    return null // API 실패 시 위젯 숨김
+  if (!rankingData || !rankingData.length) {
+    return null
   }
 
   return (
@@ -201,25 +203,19 @@ function RankingTable() {
   )
 }
 
-/* ── 경쟁사 매출 추이 라인차트 — LIVE API with fallback ── */
-function CompetitorChart({ onClick }) {
-  const { data: competitorsRaw, loading: compLoading } = useCompetitorsData()
-
-  // Transform competitors API data into chart format
+/* ── 경쟁사 매출 추이 라인차트 ── */
+function CompetitorChart({ competitorsRaw, compLoading, onClick }) {
   let chartData = mockCompetitorWeekly
   let insight = mockCompetitorInsight
   let brandNames = []
 
   if (competitorsRaw && !compLoading) {
     try {
-      // Expect: array of { brand_name, daily_data: [{ date, est_daily_revenue }], is_dcurvin }
-      // Or: { brands: [...], daily: [...] }
       if (Array.isArray(competitorsRaw)) {
         const dcurvin = competitorsRaw.find(b => b.is_dcurvin)
         const others = competitorsRaw.filter(b => !b.is_dcurvin).slice(0, 2)
         brandNames = [dcurvin, ...others].filter(Boolean).map(b => b.brand_name)
 
-        // Build chart from daily_data
         if (dcurvin?.daily_data?.length) {
           chartData = dcurvin.daily_data.slice(-7).map((d, i) => {
             const entry = { date: d.date || `Day${i + 1}` }
@@ -233,11 +229,9 @@ function CompetitorChart({ onClick }) {
 
           const lastDcurvin = chartData[chartData.length - 1]?.dcurvin || 0
           const lastComp = chartData[chartData.length - 1]?.comp0 || 0
-          if (lastDcurvin > lastComp) {
-            insight = `D.CURVIN이 최근 일 매출 기준 경쟁사를 추월했습니다.`
-          } else {
-            insight = `경쟁사 대비 D.CURVIN의 매출 격차를 좁혀가고 있습니다.`
-          }
+          insight = lastDcurvin > lastComp
+            ? `D.CURVIN이 최근 일 매출 기준 경쟁사를 추월했습니다.`
+            : `경쟁사 대비 D.CURVIN의 매출 격차를 좁혀가고 있습니다.`
         }
       }
     } catch (e) {
@@ -245,14 +239,13 @@ function CompetitorChart({ onClick }) {
     }
   }
 
-  // Determine data keys based on what we have
   const hasComp0 = chartData.some(d => d.comp0 !== undefined)
   const hasComp1 = chartData.some(d => d.comp1 !== undefined)
   const hasWeekKey = chartData.some(d => d.week !== undefined)
   const xKey = hasWeekKey ? 'week' : 'date'
 
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
       onClick={onClick}
       className="bg-white/80 backdrop-blur-xl rounded-2xl border p-5 cursor-pointer hover:shadow-md transition-all"
       style={{ borderColor: 'rgba(198,213,204,0.5)', boxShadow: '0 1px 12px rgba(42,59,50,0.04)' }}>
@@ -286,7 +279,7 @@ export default function OfficeMap() {
   const { decisions } = useGame()
   const { data: apiData, loading, error, refresh } = useApiData()
 
-  // KPI values: API data → fallback
+  // KPI values: API → fallback
   const todaySales = apiData?.sales?.todaySales || 4280000
   const todayOrders = apiData?.sales?.todayOrders || 342
   const salesChange = apiData?.sales?.salesChange || 8.4
@@ -295,6 +288,7 @@ export default function OfficeMap() {
 
   return (
     <div className="space-y-6">
+      {/* ═══ 1. CEO 인사 + KPI + 환율 ═══ */}
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="text-center pt-2">
         <h2 className="text-[26px] font-semibold tracking-[-0.02em]" style={{ color: '#2A3B32' }}>
           좋은 아침이에요, <span style={{ color: '#8EBAA4' }}>대표님</span>
@@ -305,34 +299,41 @@ export default function OfficeMap() {
         </div>
       </motion.div>
 
-      {/* KPIs */}
+      {/* KPIs + Exchange Rate in a row */}
       {loading && !apiData ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[0,1,2,3].map(i => <SkeletonKpi key={i} delay={0.05 + i * 0.05} />)}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {[0,1,2,3,4].map(i => <SkeletonKpi key={i} delay={0.05 + i * 0.05} />)}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <KpiCard label="오늘 매출" value={todaySales} prefix="₩" change={salesChange} icon="💰" delay={0.05} />
           <KpiCard label="총 주문" value={todayOrders} suffix="건" change={5.2} icon="📦" delay={0.1} />
           <KpiCard label="미답변 CS" value={unansweredCount} suffix="건" change={-12.5} icon="💬" delay={0.15} />
-          <KpiCard label="재고 부족" value={dangerItemCount} suffix="종" change={-20} icon="⚠️" delay={0.2} />
+          <KpiCard label="N배송 품절" value={dangerItemCount} suffix="종" change={-20} icon="⚠️" delay={0.2} />
+          <ExchangeWidget />
         </div>
       )}
 
-      {/* Dashboard Widgets */}
+      {/* ═══ 2. 일일 퀘스트 섹션 ═══ */}
+      <DailyQuests />
+
+      {/* ═══ 3. 매출 미니차트 + 경쟁사 추이 (2열) ═══ */}
       {loading && !apiData ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[0,1,2].map(i => <SkeletonCard key={i} height={80} lines={1} delay={0.25 + i * 0.05} />)}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <SkeletonCard height={120} lines={1} delay={0.3} />
+          <SkeletonCard height={160} lines={1} delay={0.35} />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <ExchangeWidget />
-          <SalesMiniChart salesData={apiData?.sales} />
-          <InventoryWidget inventoryData={apiData?.inventory} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <SalesMiniChart salesData={apiData?.sales} />
+            <InventoryWidget inventoryData={apiData?.inventory} />
+          </div>
+          <CompetitorChart competitorsRaw={apiData?.competitors} compLoading={loading} onClick={() => navigate('/management')} />
         </div>
       )}
 
-      {/* Team Cards Grid */}
+      {/* ═══ 4. 팀 카드 그리드 ═══ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {teamCards.map((tc, i) => {
           const char = characters[tc.id]
@@ -409,33 +410,27 @@ export default function OfficeMap() {
         </motion.div>
       </div>
 
-      {/* Competitor Chart (LIVE) */}
-      <CompetitorChart onClick={() => navigate('/management')} />
+      {/* ═══ 5. 당일 매출 순위 + 최근 의사결정 ═══ */}
+      <RankingTable rankingData={apiData?.ranking} loading={loading && !apiData} />
 
-      {/* Daily Ranking Table (LIVE) */}
-      <RankingTable />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <DailyQuests />
-        {decisions.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-            className="rounded-2xl border p-5" style={{
-              background: 'rgba(255,255,255,0.7)', borderColor: 'rgba(198,213,204,0.5)',
-              boxShadow: '0 1px 12px rgba(42,59,50,0.04)',
-            }}>
-            <h3 className="text-[14px] font-semibold mb-3 flex items-center gap-2" style={{ color: '#2A3B32' }}>📜 최근 의사결정</h3>
-            <div className="space-y-1.5">
-              {decisions.slice(-5).reverse().map((d, i) => (
-                <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
-                  className="flex items-center justify-between text-[13px] py-1.5" style={{ borderBottom: '1px solid rgba(198,213,204,0.3)' }}>
-                  <span style={{ color: '#4A6355' }}>{d.text}</span>
-                  <span className="font-semibold tabular-nums" style={{ color: '#8EBAA4' }}>+{d.exp}</span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </div>
+      {decisions.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+          className="rounded-2xl border p-5" style={{
+            background: 'rgba(255,255,255,0.7)', borderColor: 'rgba(198,213,204,0.5)',
+            boxShadow: '0 1px 12px rgba(42,59,50,0.04)',
+          }}>
+          <h3 className="text-[14px] font-semibold mb-3 flex items-center gap-2" style={{ color: '#2A3B32' }}>📜 최근 의사결정</h3>
+          <div className="space-y-1.5">
+            {decisions.slice(-5).reverse().map((d, i) => (
+              <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
+                className="flex items-center justify-between text-[13px] py-1.5" style={{ borderBottom: '1px solid rgba(198,213,204,0.3)' }}>
+                <span style={{ color: '#4A6355' }}>{d.text}</span>
+                <span className="font-semibold tabular-nums" style={{ color: '#8EBAA4' }}>+{d.exp}</span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
     </div>
   )
 }

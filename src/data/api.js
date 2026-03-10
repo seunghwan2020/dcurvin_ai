@@ -1,14 +1,7 @@
 // D.CURVIN Dashboard — API Service
-// Fetches live data from 4 endpoints with fallback to mockData
+// Fetches live data from 6 endpoints via ?type= params with fallback to mockData
 
 const BASE_URL = 'https://primary-production-44bb2.up.railway.app/webhook/dcurvin-dashboard'
-
-const ENDPOINTS = {
-  sales: `${BASE_URL}/sales`,
-  inventory: `${BASE_URL}/inventory`,
-  orders: `${BASE_URL}/orders`,
-  products: `${BASE_URL}/products`,
-}
 
 // KST date formatter → MM/DD
 function formatDateKST(dateStr) {
@@ -32,83 +25,86 @@ function toNumber(val) {
 }
 
 // Fetch a single endpoint with timeout
-async function fetchEndpoint(url, timeoutMs = 8000) {
+async function fetchEndpoint(url, timeoutMs = 10000) {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
     const res = await fetch(url, { signal: controller.signal })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    return await res.json()
+    const json = await res.json()
+    // Unwrap { success, data } pattern
+    if (json?.success && json.data !== undefined) return json.data
+    return json
   } finally {
     clearTimeout(timer)
   }
 }
 
-// Fetch all 4 endpoints concurrently
+// Fetch all 6 endpoints concurrently via Promise.all
 export async function fetchAllDashboardData() {
-  const results = await Promise.allSettled([
-    fetchEndpoint(ENDPOINTS.sales),
-    fetchEndpoint(ENDPOINTS.inventory),
-    fetchEndpoint(ENDPOINTS.orders),
-    fetchEndpoint(ENDPOINTS.products),
-  ])
+  const types = ['sales', 'inventory', 'orders', 'products', 'ranking', 'competitors']
+  const results = await Promise.allSettled(
+    types.map(type => fetchEndpoint(`${BASE_URL}?type=${type}`))
+  )
 
-  const [salesResult, inventoryResult, ordersResult, productsResult] = results
+  const out = {}
+  types.forEach((type, i) => {
+    out[type] = results[i].status === 'fulfilled' ? results[i].value : null
+  })
 
   return {
-    sales: salesResult.status === 'fulfilled' ? salesResult.value : null,
-    inventory: inventoryResult.status === 'fulfilled' ? inventoryResult.value : null,
-    orders: ordersResult.status === 'fulfilled' ? ordersResult.value : null,
-    products: productsResult.status === 'fulfilled' ? productsResult.value : null,
+    ...out,
     fetchedAt: new Date().toISOString(),
     hasAnyData: results.some(r => r.status === 'fulfilled'),
   }
 }
 
-// ── Data Mappers: API → mockData shape ──
+// ── Data Mappers: API → component shape ──
 
 export function mapSalesData(apiData) {
   if (!apiData) return null
   try {
-    const data = Array.isArray(apiData) ? apiData : apiData.data || apiData.sales || [apiData]
+    // API may return array directly or wrapped object
+    const items = Array.isArray(apiData) ? apiData : apiData.data || apiData.sales || apiData.dailySales || []
+    const src = Array.isArray(apiData) ? {} : apiData
 
-    // daily sales
-    const dailySalesData = (data.dailySales || apiData.dailySales || []).map(d => ({
+    // Build daily sales from items array
+    const dailySalesData = items.map(d => ({
       date: formatDateKST(d.date) || d.date,
       sales: toNumber(d.sales || d.revenue || d.amount),
       orders: toNumber(d.orders || d.orderCount || 0),
       profit: toNumber(d.profit || 0),
     }))
 
-    // weekly
-    const weeklySalesData = (data.weeklySales || apiData.weeklySales || []).map(d => ({
+    // Also check for nested structures
+    const weeklySalesData = (src.weeklySales || []).map(d => ({
       week: d.week || d.label,
       sales: toNumber(d.sales || d.revenue),
       orders: toNumber(d.orders || 0),
       growth: toNumber(d.growth || 0),
     }))
 
-    // monthly
-    const monthlySalesData = (data.monthlySales || apiData.monthlySales || []).map(d => ({
+    const monthlySalesData = (src.monthlySales || []).map(d => ({
       month: d.month || d.label,
       sales: toNumber(d.sales || d.revenue),
       profit: toNumber(d.profit || 0),
     }))
 
-    // today
-    const todaySales = toNumber(apiData.todaySales || apiData.today?.sales || 0)
-    const todayOrders = toNumber(apiData.todayOrders || apiData.today?.orders || 0)
-    const salesChange = toNumber(apiData.salesChange || apiData.today?.change || 0)
+    // Today's sales = last item in daily data
+    const lastDay = dailySalesData.length ? dailySalesData[dailySalesData.length - 1] : null
+    const todaySales = toNumber(src.todaySales || src.today?.sales || lastDay?.sales || 0)
+    const todayOrders = toNumber(src.todayOrders || src.today?.orders || lastDay?.orders || 0)
+    const salesChange = toNumber(src.salesChange || src.today?.change || 0)
 
-    // recent 7 days mini chart
-    const recentDailySales = (apiData.recentDailySales || apiData.recent7days || dailySalesData.slice(-7)).map((d, i, arr) => ({
-      date: d.date || formatDateKST(d.date),
-      sales: toNumber(d.sales || d.revenue || d.amount),
-      isToday: i === arr.length - 1,
+    // Recent 7 days for mini chart
+    const recent = dailySalesData.slice(-7)
+    const recentDailySales = recent.map((d, i) => ({
+      ...d,
+      isToday: i === recent.length - 1,
     }))
 
-    // product share
-    const productSalesShare = (apiData.productShare || apiData.productSalesShare || []).map((d, i) => ({
+    // Product share
+    const productSalesShare = (src.productShare || src.productSalesShare || []).map((d, i) => ({
       name: d.name || d.product,
       value: toNumber(d.value || d.share || d.percentage),
       amount: toNumber(d.amount || d.sales || 0),
@@ -134,37 +130,47 @@ export function mapSalesData(apiData) {
 export function mapInventoryData(apiData) {
   if (!apiData) return null
   try {
-    const data = Array.isArray(apiData) ? { items: apiData } : apiData
+    const items = Array.isArray(apiData) ? apiData : apiData.data || apiData.items || apiData.nDeliveryStock || apiData.nDelivery || []
+    const src = Array.isArray(apiData) ? {} : apiData
 
-    const nDeliveryStock = (data.nDeliveryStock || data.nDelivery || data.items || []).map(d => ({
+    const nDeliveryStock = items.map(d => {
+      const stockQty = toNumber(d.stock_quantity ?? d.stock ?? d.quantity ?? 0)
+      const dailyQty = toNumber(d.daily ?? d.dailySales ?? 0)
+      const daysLeft = dailyQty > 0 ? Math.round((stockQty / dailyQty) * 10) / 10 : (stockQty > 0 ? 999 : 0)
+      return {
+        sku: d.sku || d.id || d.product_id,
+        name: d.name || d.productName || d.product_name,
+        stock: stockQty,
+        daily: dailyQty,
+        daysLeft: toNumber(d.daysLeft || d.remainDays || daysLeft),
+        status: d.status || (toNumber(d.daysLeft || daysLeft) <= 3 ? '긴급' : toNumber(d.daysLeft || daysLeft) <= 7 ? '주의' : '정상'),
+        channel: d.channel || '',
+      }
+    })
+
+    const easyAdminStock = (src.easyAdminStock || src.easyAdmin || []).map(d => ({
       sku: d.sku || d.id,
-      name: d.name || d.productName,
       stock: toNumber(d.stock || d.quantity),
-      daily: toNumber(d.daily || d.dailySales || 0),
+    }))
+
+    // Restock alerts: items with low stock
+    const lowStock = nDeliveryStock.filter(d => d.daysLeft <= 7 || d.stock === 0)
+    const restockAlerts = (src.restockAlerts || src.alerts || lowStock).map(d => ({
+      sku: d.sku || d.id,
+      name: d.name || d.productName || d.product_name,
       daysLeft: toNumber(d.daysLeft || d.remainDays || 0),
-      status: d.status || (toNumber(d.daysLeft) <= 3 ? '긴급' : toNumber(d.daysLeft) <= 7 ? '주의' : '정상'),
-    }))
-
-    const easyAdminStock = (data.easyAdminStock || data.easyAdmin || []).map(d => ({
-      sku: d.sku || d.id,
-      stock: toNumber(d.stock || d.quantity),
-    }))
-
-    const restockAlerts = (data.restockAlerts || data.alerts || nDeliveryStock.filter(d => d.daysLeft <= 7)).map(d => ({
-      sku: d.sku || d.id,
-      name: d.name || d.productName,
-      daysLeft: toNumber(d.daysLeft || d.remainDays),
       needed: toNumber(d.needed || d.requiredQty || 0),
-      urgency: d.urgency || (toNumber(d.daysLeft) <= 3 ? '긴급' : '주의'),
+      urgency: d.urgency || (toNumber(d.daysLeft) <= 3 || d.stock === 0 ? '긴급' : '주의'),
     }))
 
-    // inventory gauge for main screen
-    const dangerItems = restockAlerts.filter(d => d.daysLeft <= 5).length
+    // N배송 품절 예상 count: items where 도착보장 stock_quantity = 0
+    const outOfStockCount = nDeliveryStock.filter(d => d.stock === 0).length
+    const dangerItems = outOfStockCount || restockAlerts.filter(d => d.daysLeft <= 5).length
     const inventoryGauge = {
       totalSKU: nDeliveryStock.length,
       dangerItems,
       dangerList: restockAlerts.slice(0, 3).map(d => ({ name: d.name, daysLeft: d.daysLeft })),
-      alertText: `${dangerItems}개 품목 5일 내 N배송 품절 예상`,
+      alertText: dangerItems > 0 ? `${dangerItems}개 품목 N배송 품절 예상` : '재고 안정',
     }
 
     return {
@@ -255,6 +261,45 @@ export function mapProductsData(apiData) {
     }
   } catch (e) {
     console.warn('[API] Products data mapping failed:', e)
+    return null
+  }
+}
+
+// Ranking data is passed through as-is (already unwrapped by fetchEndpoint)
+export function mapRankingData(apiData) {
+  if (!apiData) return null
+  try {
+    const items = Array.isArray(apiData) ? apiData : apiData.data || []
+    return items.map(d => ({
+      ...d,
+      today_sales: toNumber(d.today_sales),
+      est_daily_revenue: toNumber(d.est_daily_revenue),
+      weekly_sales: toNumber(d.weekly_sales),
+      est_weekly_revenue: toNumber(d.est_weekly_revenue),
+      total_reviews: toNumber(d.total_reviews),
+    }))
+  } catch (e) {
+    console.warn('[API] Ranking data mapping failed:', e)
+    return null
+  }
+}
+
+// Competitors data pass-through with number conversion
+export function mapCompetitorsData(apiData) {
+  if (!apiData) return null
+  try {
+    if (Array.isArray(apiData)) {
+      return apiData.map(brand => ({
+        ...brand,
+        daily_data: (brand.daily_data || []).map(d => ({
+          ...d,
+          est_daily_revenue: toNumber(d.est_daily_revenue || d.revenue),
+        })),
+      }))
+    }
+    return apiData
+  } catch (e) {
+    console.warn('[API] Competitors data mapping failed:', e)
     return null
   }
 }

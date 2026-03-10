@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { fetchAllDashboardData, mapSalesData, mapInventoryData, mapOrdersData, mapProductsData } from '../data/api'
+import { fetchAllDashboardData, mapSalesData, mapInventoryData, mapOrdersData, mapProductsData, mapRankingData, mapCompetitorsData } from '../data/api'
 
 const REFRESH_INTERVAL = 5 * 60 * 1000 // 5 minutes
 
@@ -24,6 +24,8 @@ async function doFetch() {
       inventory: mapInventoryData(raw.inventory),
       orders: mapOrdersData(raw.orders),
       products: mapProductsData(raw.products),
+      ranking: mapRankingData(raw.ranking),
+      competitors: mapCompetitorsData(raw.competitors),
       fetchedAt: raw.fetchedAt,
       hasAnyData: raw.hasAnyData,
     }
@@ -56,16 +58,13 @@ export function useApiData() {
   }, [])
 
   useEffect(() => {
-    // Subscribe to shared state updates
     const onUpdate = () => setData({ ...sharedCache })
     listeners.add(onUpdate)
 
-    // Initial fetch if no cache or stale
     if (!sharedCache || Date.now() - lastFetchTime > REFRESH_INTERVAL) {
       refresh()
     }
 
-    // Auto-refresh every 5 minutes
     intervalRef.current = setInterval(refresh, REFRESH_INTERVAL)
 
     return () => {
@@ -78,51 +77,32 @@ export function useApiData() {
 }
 
 // Convenience hooks for specific team data
-export function useSalesData(fallback) {
+export function useSalesData() {
   const { data, loading, error, refresh } = useApiData()
-  return {
-    data: data?.sales || null,
-    fallback,
-    loading,
-    error,
-    refresh,
-    // Helper: get value with fallback
-    get: (key) => data?.sales?.[key] ?? fallback?.[key] ?? null,
-  }
+  return { data: data?.sales || null, loading, error, refresh }
 }
 
-export function useInventoryData(fallback) {
+export function useInventoryData() {
   const { data, loading, error, refresh } = useApiData()
-  return {
-    data: data?.inventory || null,
-    fallback,
-    loading,
-    error,
-    refresh,
-    get: (key) => data?.inventory?.[key] ?? fallback?.[key] ?? null,
-  }
+  return { data: data?.inventory || null, loading, error, refresh }
 }
 
-export function useOrdersData(fallback) {
+export function useOrdersData() {
   const { data, loading, error, refresh } = useApiData()
-  return {
-    data: data?.orders || null,
-    fallback,
-    loading,
-    error,
-    refresh,
-    get: (key) => data?.orders?.[key] ?? fallback?.[key] ?? null,
-  }
+  return { data: data?.orders || null, loading, error, refresh }
 }
 
-export function useProductsData(fallback) {
+export function useProductsData() {
   const { data, loading, error, refresh } = useApiData()
-  return {
-    data: data?.products || null,
-    fallback,
-    loading,
-    error,
-    refresh,
-    get: (key) => data?.products?.[key] ?? fallback?.[key] ?? null,
-  }
+  return { data: data?.products || null, loading, error, refresh }
+}
+
+export function useRankingData() {
+  const { data, loading, error, refresh } = useApiData()
+  return { data: data?.ranking || null, loading, error, refresh }
+}
+
+export function useCompetitorsData() {
+  const { data, loading, error, refresh } = useApiData()
+  return { data: data?.competitors || null, loading, error, refresh }
 }
