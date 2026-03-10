@@ -5,8 +5,11 @@ import Card from '../components/Card'
 import ReportLayout from '../components/ReportLayout'
 import DecisionPanel from '../components/DecisionPanel'
 import ExecutionChecklist from '../components/ExecutionChecklist'
+import SkeletonCard from '../components/SkeletonCard'
+import { DataStatusBadge } from '../components/SkeletonCard'
 import CountUp from '../components/CountUp'
-import { characters, dailySalesData, weeklySalesData, monthlySalesData, productSalesShare, colorTrendData, colorDetailData, salesForecastData, competitorData, managementDecisions, executionChecklists } from '../data/mockData'
+import { characters, dailySalesData as mockDaily, weeklySalesData as mockWeekly, monthlySalesData as mockMonthly, productSalesShare as mockProductShare, colorTrendData, colorDetailData, salesForecastData, competitorData, managementDecisions, executionChecklists } from '../data/mockData'
+import { useSalesData } from '../hooks/useApiData'
 
 const c = characters.yujin
 const msgs = [
@@ -18,9 +21,24 @@ const msgs = [
 
 export default function ManagementTeam() {
   const [tab, setTab] = useState('daily')
+  const { data: salesData, loading, error, refresh } = useSalesData()
+
+  // Use API data with fallback to mockData
+  const dailySalesData = salesData?.dailySalesData || mockDaily
+  const weeklySalesData = salesData?.weeklySalesData || mockWeekly
+  const monthlySalesData = salesData?.monthlySalesData || mockMonthly
+  const productSalesShare = salesData?.productSalesShare || mockProductShare
+
   return (
     <ReportLayout characterId="yujin" characterName={c.name} characterColor={c.color} messages={msgs} questId="q1">
       <div className="space-y-5">
+        <div className="flex justify-end">
+          <DataStatusBadge loading={loading} error={error} fetchedAt={salesData ? undefined : undefined} onRefresh={refresh} />
+        </div>
+
+        {loading && !salesData ? (
+          <SkeletonCard title="매출 추이" icon="📈" height={240} delay={0.1} />
+        ) : (
         <Card title="매출 추이" icon="📈" delay={0.1}>
           <div className="flex gap-2 mb-4">
             {[{ id:'daily',l:'일별' },{id:'weekly',l:'주별'},{id:'monthly',l:'월별'}].map(t=>(
@@ -37,6 +55,8 @@ export default function ManagementTeam() {
             )}
           </ResponsiveContainer>
         </Card>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <Card title="제품별 매출 비중" icon="🛍️" delay={0.15}>
             <ResponsiveContainer width="100%" height={200}>

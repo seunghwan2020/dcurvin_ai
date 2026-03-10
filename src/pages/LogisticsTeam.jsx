@@ -4,8 +4,11 @@ import Card from '../components/Card'
 import ReportLayout from '../components/ReportLayout'
 import DecisionPanel from '../components/DecisionPanel'
 import ExecutionChecklist from '../components/ExecutionChecklist'
+import SkeletonCard from '../components/SkeletonCard'
+import { DataStatusBadge } from '../components/SkeletonCard'
 import CountUp from '../components/CountUp'
-import { characters, nDeliveryStock, easyAdminStock, restockAlerts, depletionTimeline, oemRecommendation, containerData, logisticsDecisions, executionChecklists } from '../data/mockData'
+import { characters, nDeliveryStock as mockNDelivery, easyAdminStock as mockEasyAdmin, restockAlerts as mockRestockAlerts, depletionTimeline, oemRecommendation, containerData, logisticsDecisions, executionChecklists } from '../data/mockData'
+import { useInventoryData } from '../hooks/useApiData'
 
 const c = characters.taehyun
 const msgs = [
@@ -16,9 +19,23 @@ const msgs = [
 ]
 
 export default function LogisticsTeam() {
+  const { data: invData, loading, error, refresh } = useInventoryData()
+
+  // Use API data with fallback to mockData
+  const nDeliveryStock = invData?.nDeliveryStock || mockNDelivery
+  const easyAdminStock = invData?.easyAdminStock || mockEasyAdmin
+  const restockAlerts = invData?.restockAlerts || mockRestockAlerts
+
   return (
     <ReportLayout characterId="taehyun" characterName={c.name} characterColor={c.color} messages={msgs} questId="q3">
       <div className="space-y-5">
+        <div className="flex justify-end">
+          <DataStatusBadge loading={loading} error={error} onRefresh={refresh} />
+        </div>
+
+        {loading && !invData ? (
+          <SkeletonCard title="N배송 입고 필요건" icon="🚨" height={160} delay={0.1} />
+        ) : (
         <Card title="N배송 입고 필요건" icon="🚨" delay={0.1}>
           <div className="space-y-2">
             {restockAlerts.map((item, i) => (
@@ -32,6 +49,7 @@ export default function LogisticsTeam() {
             ))}
           </div>
         </Card>
+        )}
 
         <Card title="재고 소진 예정일 타임라인" icon="📊" delay={0.15}>
           <ResponsiveContainer width="100%" height={240}>
@@ -39,6 +57,9 @@ export default function LogisticsTeam() {
           </ResponsiveContainer>
         </Card>
 
+        {loading && !invData ? (
+          <SkeletonCard title="통합 재고" icon="📦" height={200} lines={5} delay={0.2} />
+        ) : (
         <Card title="통합 재고 (N배송 + 이지어드민)" icon="📦" delay={0.2}>
           <div className="overflow-x-auto">
             <table className="w-full text-[12px]">
@@ -53,6 +74,7 @@ export default function LogisticsTeam() {
             </table>
           </div>
         </Card>
+        )}
 
         <Card title="OEM 제작 물량 추천" icon="🏭" delay={0.25}>
           <div className="space-y-2">{oemRecommendation.map((item, i) => (

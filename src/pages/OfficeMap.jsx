@@ -6,8 +6,11 @@ import KpiCard from '../components/KpiCard'
 import DailyQuests from '../components/DailyQuests'
 import Card from '../components/Card'
 import CountUp from '../components/CountUp'
-import { characters, exchangeRateData, recentDailySales, inventoryGauge, competitorWeeklyData, competitorInsight } from '../data/mockData'
+import { DataStatusBadge, SkeletonKpi } from '../components/SkeletonCard'
+import SkeletonCard from '../components/SkeletonCard'
+import { characters, exchangeRateData, recentDailySales as mockRecentSales, inventoryGauge as mockInventoryGauge, competitorWeeklyData, competitorInsight } from '../data/mockData'
 import { useGame } from '../context/GameContext'
+import { useApiData } from '../hooks/useApiData'
 
 const teamCards = [
   { id: 'yujin', path: '/management', preview: '이번 달 매출 1.18억 · 전월비 +12.8%' },
@@ -26,7 +29,7 @@ function TitleBadge({ title, color }) {
   )
 }
 
-/* 위안화 환율 위젯 */
+/* 위안화 환율 위젯 — stays mockData (no API yet) */
 function ExchangeWidget() {
   const { label, current, previous, change, direction, weekly } = exchangeRateData
   return (
@@ -52,8 +55,9 @@ function ExchangeWidget() {
   )
 }
 
-/* 매출 미니차트 (7일) */
-function SalesMiniChart() {
+/* 매출 미니차트 (7일) — uses API data with fallback */
+function SalesMiniChart({ salesData }) {
+  const recentDailySales = salesData?.recentDailySales || mockRecentSales
   return (
     <Card title="최근 7일 매출" icon="📊" delay={0.3}>
       <ResponsiveContainer width="100%" height={80}>
@@ -75,9 +79,10 @@ function SalesMiniChart() {
   )
 }
 
-/* N배송 품절 예상 */
-function InventoryWidget() {
-  const { dangerItems, alertText, dangerList } = inventoryGauge
+/* N배송 품절 예상 — uses API data with fallback */
+function InventoryWidget({ inventoryData }) {
+  const gauge = inventoryData?.inventoryGauge || mockInventoryGauge
+  const { dangerItems, alertText, dangerList } = gauge
   return (
     <Card title="N배송 품절 예상" icon="📦" delay={0.35}>
       <div className="flex items-center gap-3 mb-3">
@@ -100,7 +105,7 @@ function InventoryWidget() {
   )
 }
 
-/* 시장 동향 — 경쟁사 비교 */
+/* 시장 동향 — 경쟁사 비교 (stays mockData) */
 function CompetitorChart({ onClick }) {
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
@@ -129,6 +134,14 @@ function CompetitorChart({ onClick }) {
 export default function OfficeMap() {
   const navigate = useNavigate()
   const { decisions } = useGame()
+  const { data: apiData, loading, error, refresh } = useApiData()
+
+  // KPI values: API data → fallback
+  const todaySales = apiData?.sales?.todaySales || 4280000
+  const todayOrders = apiData?.sales?.todayOrders || 342
+  const salesChange = apiData?.sales?.salesChange || 8.4
+  const unansweredCount = apiData?.orders?.unansweredCount || 8
+  const dangerItemCount = apiData?.inventory?.inventoryGauge?.dangerItems || 5
 
   return (
     <div className="space-y-6">
@@ -137,22 +150,37 @@ export default function OfficeMap() {
           좋은 아침이에요, <span style={{ color: '#8EBAA4' }}>대표님</span>
         </h2>
         <p className="text-[13px] mt-1" style={{ color: '#7A9B88' }}>각 팀 카드를 클릭하면 보고를 받을 수 있어요.</p>
+        <div className="flex justify-center mt-2">
+          <DataStatusBadge loading={loading} error={error} fetchedAt={apiData?.fetchedAt} onRefresh={refresh} />
+        </div>
       </motion.div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard label="오늘 매출" value={4280000} prefix="₩" change={8.4} icon="💰" delay={0.05} />
-        <KpiCard label="총 주문" value={342} suffix="건" change={5.2} icon="📦" delay={0.1} />
-        <KpiCard label="미답변 CS" value={8} suffix="건" change={-12.5} icon="💬" delay={0.15} />
-        <KpiCard label="재고 부족" value={5} suffix="종" change={-20} icon="⚠️" delay={0.2} />
-      </div>
+      {loading && !apiData ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[0,1,2,3].map(i => <SkeletonKpi key={i} delay={0.05 + i * 0.05} />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <KpiCard label="오늘 매출" value={todaySales} prefix="₩" change={salesChange} icon="💰" delay={0.05} />
+          <KpiCard label="총 주문" value={todayOrders} suffix="건" change={5.2} icon="📦" delay={0.1} />
+          <KpiCard label="미답변 CS" value={unansweredCount} suffix="건" change={-12.5} icon="💬" delay={0.15} />
+          <KpiCard label="재고 부족" value={dangerItemCount} suffix="종" change={-20} icon="⚠️" delay={0.2} />
+        </div>
+      )}
 
       {/* Dashboard Widgets */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <ExchangeWidget />
-        <SalesMiniChart />
-        <InventoryWidget />
-      </div>
+      {loading && !apiData ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[0,1,2].map(i => <SkeletonCard key={i} height={80} lines={1} delay={0.25 + i * 0.05} />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <ExchangeWidget />
+          <SalesMiniChart salesData={apiData?.sales} />
+          <InventoryWidget inventoryData={apiData?.inventory} />
+        </div>
+      )}
 
       {/* Team Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

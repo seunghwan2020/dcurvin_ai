@@ -4,7 +4,10 @@ import Card from '../components/Card'
 import ReportLayout from '../components/ReportLayout'
 import DecisionPanel from '../components/DecisionPanel'
 import ExecutionChecklist from '../components/ExecutionChecklist'
-import { characters, csStatusData, unansweredCS, claimData, satisfactionData, csDecisions, executionChecklists } from '../data/mockData'
+import SkeletonCard from '../components/SkeletonCard'
+import { DataStatusBadge } from '../components/SkeletonCard'
+import { characters, csStatusData as mockCsStatus, unansweredCS as mockUnanswered, claimData as mockClaimData, satisfactionData as mockSatisfaction, csDecisions, executionChecklists } from '../data/mockData'
+import { useOrdersData } from '../hooks/useApiData'
 
 const c = characters.seoyeon
 const msgs = [
@@ -15,9 +18,27 @@ const msgs = [
 ]
 
 export default function CSTeam() {
+  const { data: ordersData, loading, error, refresh } = useOrdersData()
+
+  // Use API data with fallback to mockData
+  const csStatusData = ordersData?.csStatusData || mockCsStatus
+  const unansweredCS = ordersData?.unansweredCS || mockUnanswered
+  const claimData = ordersData?.claimData || mockClaimData
+  const satisfactionData = ordersData?.satisfactionData || mockSatisfaction
+
   return (
     <ReportLayout characterId="seoyeon" characterName={c.name} characterColor={c.color} messages={msgs} questId="q2">
       <div className="space-y-5">
+        <div className="flex justify-end">
+          <DataStatusBadge loading={loading} error={error} onRefresh={refresh} />
+        </div>
+
+        {loading && !ordersData ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <SkeletonCard title="답변 현황" icon="📊" height={180} delay={0.1} />
+            <SkeletonCard title="고객 만족도 트렌드" icon="😊" height={180} delay={0.15} />
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <Card title="답변 현황" icon="📊" delay={0.1}>
             <div className="flex items-center">
@@ -29,7 +50,11 @@ export default function CSTeam() {
             <ResponsiveContainer width="100%" height={180}><LineChart data={satisfactionData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="month" tick={{fontSize:11}}/><YAxis domain={[3.5,5]} tick={{fontSize:10}}/><Tooltip/><Line type="monotone" dataKey="score" stroke="#8EBAA4" strokeWidth={2} dot={{fill:'#8EBAA4',r:4}} name="만족도"/></LineChart></ResponsiveContainer>
           </Card>
         </div>
+        )}
 
+        {loading && !ordersData ? (
+          <SkeletonCard title="미답변 문의 목록" icon="🔴" height={200} lines={5} delay={0.2} />
+        ) : (
         <Card title="미답변 문의 목록" icon="🔴" delay={0.2}>
           <div className="space-y-2">{unansweredCS.map((item,i)=>(
             <motion.div key={item.id} initial={{opacity:0,x:-16}} animate={{opacity:1,x:0}} transition={{delay:0.3+i*0.04}}
@@ -48,6 +73,7 @@ export default function CSTeam() {
             </motion.div>
           ))}</div>
         </Card>
+        )}
 
         <Card title="클레임/반품 현황" icon="📉" delay={0.25}>
           <ResponsiveContainer width="100%" height={220}><BarChart data={claimData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="month" tick={{fontSize:11}}/><YAxis tick={{fontSize:10}}/><Tooltip/><Legend wrapperStyle={{fontSize:'11px'}}/><Bar dataKey="claims" name="클레임" fill="#C45C5C" radius={[4,4,0,0]}/><Bar dataKey="returns" name="반품" fill="#7A9B88" radius={[4,4,0,0]}/><Bar dataKey="refunds" name="환불" fill="#4A6355" radius={[4,4,0,0]}/></BarChart></ResponsiveContainer>

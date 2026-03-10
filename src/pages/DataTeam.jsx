@@ -4,8 +4,11 @@ import Card from '../components/Card'
 import ReportLayout from '../components/ReportLayout'
 import DecisionPanel from '../components/DecisionPanel'
 import ExecutionChecklist from '../components/ExecutionChecklist'
+import SkeletonCard from '../components/SkeletonCard'
+import { DataStatusBadge } from '../components/SkeletonCard'
 import CountUp from '../components/CountUp'
-import { characters, productSalesData, sizeHeatmap, colorHeatmap, purchasePatterns, reviewSentiment, dataDecisions, executionChecklists } from '../data/mockData'
+import { characters, productSalesData as mockProductSales, sizeHeatmap as mockSizeHeatmap, colorHeatmap as mockColorHeatmap, purchasePatterns as mockPurchasePatterns, reviewSentiment as mockReviewSentiment, dataDecisions, executionChecklists } from '../data/mockData'
+import { useProductsData } from '../hooks/useApiData'
 
 const c = characters.minjun
 const msgs = [
@@ -13,11 +16,6 @@ const msgs = [
   { text: 'Edge V2가 여전히 1위인데, ConnectBag 성장률이 22.8%로 가장 높아요!' },
   { text: '흥미로운 발견! Edge V2와 ConnectBag 함께 사는 고객이 12.3%나 됩니다.' },
   { text: '리뷰 감성 분석도 했어요. 전체 긍정률 72%, 평균 별점 4.3점입니다!' },
-]
-const sentimentPie = [
-  { name: '긍정', value: reviewSentiment.positive, color: '#4A6355' },
-  { name: '중립', value: reviewSentiment.neutral, color: '#7A9B88' },
-  { name: '부정', value: reviewSentiment.negative, color: '#C45C5C' },
 ]
 
 function Heatmap({ labels, cols, colColors, data, delay = 0 }) {
@@ -40,9 +38,31 @@ function Heatmap({ labels, cols, colColors, data, delay = 0 }) {
 }
 
 export default function DataTeam() {
+  const { data: prodData, loading, error, refresh } = useProductsData()
+
+  // Use API data with fallback to mockData
+  const productSalesData = prodData?.productSalesData || mockProductSales
+  const sizeHeatmap = prodData?.sizeHeatmap || mockSizeHeatmap
+  const colorHeatmap = prodData?.colorHeatmap || mockColorHeatmap
+  const purchasePatterns = prodData?.purchasePatterns || mockPurchasePatterns
+  const reviewSentiment = prodData?.reviewSentiment || mockReviewSentiment
+
+  const sentimentPie = [
+    { name: '긍정', value: reviewSentiment.positive, color: '#4A6355' },
+    { name: '중립', value: reviewSentiment.neutral, color: '#7A9B88' },
+    { name: '부정', value: reviewSentiment.negative, color: '#C45C5C' },
+  ]
+
   return (
     <ReportLayout characterId="minjun" characterName={c.name} characterColor={c.color} messages={msgs}>
       <div className="space-y-5">
+        <div className="flex justify-end">
+          <DataStatusBadge loading={loading} error={error} onRefresh={refresh} />
+        </div>
+
+        {loading && !prodData ? (
+          <SkeletonCard title="제품별 판매 현황" icon="📦" height={120} delay={0.1} />
+        ) : (
         <Card title="제품별 판매 현황" icon="📦" delay={0.1}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">{productSalesData.map((p, i) => (
             <motion.div key={p.product} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.07 }}
@@ -54,6 +74,7 @@ export default function DataTeam() {
             </motion.div>
           ))}</div>
         </Card>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <Card title="사이즈별 판매 히트맵" icon="📐" delay={0.15}>
@@ -66,9 +87,9 @@ export default function DataTeam() {
 
         <Card title="고객 구매 패턴" icon="🔄" delay={0.25}>
           <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className="text-center p-3 bg-[#EFF4F1] rounded-xl"><p className="text-xl font-bold text-[#4A6355]"><CountUp end={342} decimals={1}/>%</p><p className="text-[10px] text-gray-400">재구매율</p></div>
-            <div className="text-center p-3 bg-[#EFF4F1] rounded-xl"><p className="text-xl font-bold text-[#7A9B88]"><CountUp end={45}/>일</p><p className="text-[10px] text-gray-400">재구매 주기</p></div>
-            <div className="text-center p-3 bg-[#EFF4F1] rounded-xl"><p className="text-xl font-bold text-[#4A6355]"><CountUp end={18} decimals={1}/>개</p><p className="text-[10px] text-gray-400">평균 구매량</p></div>
+            <div className="text-center p-3 bg-[#EFF4F1] rounded-xl"><p className="text-xl font-bold text-[#4A6355]"><CountUp end={purchasePatterns.repeatRate} decimals={1}/>%</p><p className="text-[10px] text-gray-400">재구매율</p></div>
+            <div className="text-center p-3 bg-[#EFF4F1] rounded-xl"><p className="text-xl font-bold text-[#7A9B88]"><CountUp end={purchasePatterns.avgInterval}/>일</p><p className="text-[10px] text-gray-400">재구매 주기</p></div>
+            <div className="text-center p-3 bg-[#EFF4F1] rounded-xl"><p className="text-xl font-bold text-[#4A6355]"><CountUp end={purchasePatterns.avgItems} decimals={1}/>개</p><p className="text-[10px] text-gray-400">평균 구매량</p></div>
           </div>
           <p className="text-[11px] font-semibold text-gray-400 mb-2">인기 조합</p>
           {purchasePatterns.combos.map((combo, i) => <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 + i * 0.06 }} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
