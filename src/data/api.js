@@ -1,7 +1,7 @@
 // D.CURVIN Dashboard — API Service
 // Fetches live data from 6 endpoints via ?type= params with fallback to mockData
 
-const BASE_URL = 'https://primary-production-44bb2.up.railway.app/webhook/dcurvin-dashboard'
+const API_BASE = 'https://primary-production-44bb2.up.railway.app/webhook/dcurvin-dashboard'
 
 // KST date formatter → MM/DD
 function formatDateKST(dateStr) {
@@ -44,7 +44,7 @@ async function fetchEndpoint(url, timeoutMs = 10000) {
 export async function fetchAllDashboardData() {
   const types = ['sales', 'inventory', 'orders', 'products', 'ranking', 'competitors']
   const results = await Promise.allSettled(
-    types.map(type => fetchEndpoint(`${BASE_URL}?type=${type}`))
+    types.map(type => fetchEndpoint(`${API_BASE}?type=${type}`))
   )
 
   const out = {}
