@@ -50,6 +50,8 @@ export async function fetchAllDashboardData() {
   const out = {}
   types.forEach((type, i) => {
     out[type] = results[i].status === 'fulfilled' ? results[i].value : null
+    // Debug: log raw API responses
+    console.log(`[API RAW] ${type}:`, results[i].status === 'fulfilled' ? results[i].value : results[i].reason?.message)
   })
 
   return {
@@ -64,17 +66,30 @@ export async function fetchAllDashboardData() {
 export function mapSalesData(apiData) {
   if (!apiData) return null
   try {
+    console.log('[API MAP] sales input:', apiData)
     // API may return array directly or wrapped object
     const items = Array.isArray(apiData) ? apiData : apiData.data || apiData.sales || apiData.dailySales || []
     const src = Array.isArray(apiData) ? {} : apiData
 
     // Build daily sales from items array
+    // API fields: date, revenue (string), order_count (string)
     const dailySalesData = items.map(d => ({
       date: formatDateKST(d.date) || d.date,
-      sales: toNumber(d.sales || d.revenue || d.amount),
-      orders: toNumber(d.orders || d.orderCount || 0),
+      sales: toNumber(d.revenue || d.sales || d.amount),
+      orders: toNumber(d.order_count || d.orders || d.orderCount || 0),
       profit: toNumber(d.profit || 0),
     }))
+
+    // Sort by date to ensure chronological order
+    dailySalesData.sort((a, b) => {
+      const parseDate = (s) => {
+        if (!s) return 0
+        const parts = s.split('/')
+        if (parts.length === 2) return Number(parts[0]) * 100 + Number(parts[1])
+        return 0
+      }
+      return parseDate(a.date) - parseDate(b.date)
+    })
 
     // Also check for nested structures
     const weeklySalesData = (src.weeklySales || []).map(d => ({
@@ -90,16 +105,24 @@ export function mapSalesData(apiData) {
       profit: toNumber(d.profit || 0),
     }))
 
-    // Today's sales = last item in daily data
+    // Today's sales = last item in daily data (most recent date)
     const lastDay = dailySalesData.length ? dailySalesData[dailySalesData.length - 1] : null
     const todaySales = toNumber(src.todaySales || src.today?.sales || lastDay?.sales || 0)
     const todayOrders = toNumber(src.todayOrders || src.today?.orders || lastDay?.orders || 0)
-    const salesChange = toNumber(src.salesChange || src.today?.change || 0)
 
-    // Recent 7 days for mini chart
+    // Calculate salesChange from last two days
+    let salesChange = toNumber(src.salesChange || src.today?.change || 0)
+    if (!salesChange && dailySalesData.length >= 2) {
+      const prev = dailySalesData[dailySalesData.length - 2].sales
+      const curr = dailySalesData[dailySalesData.length - 1].sales
+      if (prev > 0) salesChange = Math.round(((curr - prev) / prev) * 1000) / 10
+    }
+
+    // Recent 7 days for mini chart — ensure sales are Numbers
     const recent = dailySalesData.slice(-7)
     const recentDailySales = recent.map((d, i) => ({
       ...d,
+      sales: Number(d.sales) || 0,
       isToday: i === recent.length - 1,
     }))
 
@@ -110,6 +133,8 @@ export function mapSalesData(apiData) {
       amount: toNumber(d.amount || d.sales || 0),
       color: ['#2A3B32', '#4A6355', '#7A9B88', '#8EBAA4'][i % 4],
     }))
+
+    console.log('[API MAP] sales output:', { todaySales, todayOrders, salesChange, recentDays: recentDailySales.length })
 
     return {
       dailySalesData: dailySalesData.length ? dailySalesData : null,
@@ -130,20 +155,30 @@ export function mapSalesData(apiData) {
 export function mapInventoryData(apiData) {
   if (!apiData) return null
   try {
-    const items = Array.isArray(apiData) ? apiData : apiData.data || apiData.items || apiData.nDeliveryStock || apiData.nDelivery || []
+    console.log('[API MAP] inventory input:', apiData)
+
+    // API may return { nDelivery: [...] } or flat array
+    let items = []
+    if (Array.isArray(apiData)) {
+      items = apiData
+    } else if (apiData.nDelivery) {
+      items = Array.isArray(apiData.nDelivery) ? apiData.nDelivery : []
+    } else {
+      items = apiData.data || apiData.items || apiData.nDeliveryStock || []
+    }
     const src = Array.isArray(apiData) ? {} : apiData
 
     const nDeliveryStock = items.map(d => {
       const stockQty = toNumber(d.stock_quantity ?? d.stock ?? d.quantity ?? 0)
-      const dailyQty = toNumber(d.daily ?? d.dailySales ?? 0)
+      const dailyQty = toNumber(d.daily_sales ?? d.daily ?? d.dailySales ?? 0)
       const daysLeft = dailyQty > 0 ? Math.round((stockQty / dailyQty) * 10) / 10 : (stockQty > 0 ? 999 : 0)
       return {
         sku: d.sku || d.id || d.product_id,
         name: d.name || d.productName || d.product_name,
         stock: stockQty,
         daily: dailyQty,
-        daysLeft: toNumber(d.daysLeft || d.remainDays || daysLeft),
-        status: d.status || (toNumber(d.daysLeft || daysLeft) <= 3 ? '긴급' : toNumber(d.daysLeft || daysLeft) <= 7 ? '주의' : '정상'),
+        daysLeft: toNumber(d.daysLeft || d.remainDays || d.days_left || daysLeft),
+        status: d.status || (stockQty === 0 ? '품절' : toNumber(d.daysLeft || daysLeft) <= 3 ? '긴급' : toNumber(d.daysLeft || daysLeft) <= 7 ? '주의' : '정상'),
         channel: d.channel || '',
       }
     })
@@ -153,25 +188,32 @@ export function mapInventoryData(apiData) {
       stock: toNumber(d.stock || d.quantity),
     }))
 
-    // Restock alerts: items with low stock
+    // N배송 품절 count: items where stock_quantity = 0
+    const outOfStockCount = nDeliveryStock.filter(d => d.stock === 0).length
+
+    // Restock alerts: items with low stock or out of stock
     const lowStock = nDeliveryStock.filter(d => d.daysLeft <= 7 || d.stock === 0)
     const restockAlerts = (src.restockAlerts || src.alerts || lowStock).map(d => ({
       sku: d.sku || d.id,
       name: d.name || d.productName || d.product_name,
-      daysLeft: toNumber(d.daysLeft || d.remainDays || 0),
+      daysLeft: toNumber(d.daysLeft || d.remainDays || d.days_left || 0),
       needed: toNumber(d.needed || d.requiredQty || 0),
-      urgency: d.urgency || (toNumber(d.daysLeft) <= 3 || d.stock === 0 ? '긴급' : '주의'),
+      urgency: d.urgency || (d.stock === 0 || toNumber(d.daysLeft) <= 3 ? '긴급' : '주의'),
     }))
 
-    // N배송 품절 예상 count: items where 도착보장 stock_quantity = 0
-    const outOfStockCount = nDeliveryStock.filter(d => d.stock === 0).length
+    // dangerItems = out of stock count (stock_quantity=0)
     const dangerItems = outOfStockCount || restockAlerts.filter(d => d.daysLeft <= 5).length
     const inventoryGauge = {
       totalSKU: nDeliveryStock.length,
       dangerItems,
-      dangerList: restockAlerts.slice(0, 3).map(d => ({ name: d.name, daysLeft: d.daysLeft })),
+      dangerList: (outOfStockCount > 0
+        ? nDeliveryStock.filter(d => d.stock === 0).slice(0, 3)
+        : restockAlerts.slice(0, 3)
+      ).map(d => ({ name: d.name, daysLeft: d.daysLeft })),
       alertText: dangerItems > 0 ? `${dangerItems}개 품목 N배송 품절 예상` : '재고 안정',
     }
+
+    console.log('[API MAP] inventory output:', { totalSKU: nDeliveryStock.length, outOfStockCount, dangerItems })
 
     return {
       nDeliveryStock: nDeliveryStock.length ? nDeliveryStock : null,
@@ -188,7 +230,9 @@ export function mapInventoryData(apiData) {
 export function mapOrdersData(apiData) {
   if (!apiData) return null
   try {
+    console.log('[API MAP] orders input:', apiData)
     const data = Array.isArray(apiData) ? { items: apiData } : apiData
+    const items = data.items || []
 
     const csStatusData = (data.csStatus || data.status || []).map((d, i) => ({
       name: d.name || d.label,
@@ -217,11 +261,43 @@ export function mapOrdersData(apiData) {
       score: toNumber(d.score || d.rating || 0),
     }))
 
-    const totalCS = csStatusData.reduce((sum, d) => sum + d.value, 0)
-    const unansweredCount = unansweredCS.length || (csStatusData.find(d => d.name === '미답변')?.value || 0)
+    // Calculate unanswered count from multiple sources
+    let unansweredCount = 0
+
+    if (unansweredCS.length > 0) {
+      unansweredCount = unansweredCS.length
+    } else if (csStatusData.length > 0) {
+      unansweredCount = csStatusData.find(d => d.name === '미답변')?.value || 0
+    } else if (items.length > 0) {
+      // Calculate from raw order items: count orders with unanswered/pending CS status
+      unansweredCount = items.filter(d => {
+        const status = (d.cs_status || d.status || '').toLowerCase()
+        return status === '미답변' || status === 'unanswered' || status === 'pending'
+      }).length
+    }
+
+    // If we have items but no csStatusData, build it from items
+    let finalCsStatusData = csStatusData
+    if (csStatusData.length === 0 && items.length > 0) {
+      const statusMap = {}
+      items.forEach(d => {
+        const status = d.cs_status || d.status || '기타'
+        statusMap[status] = (statusMap[status] || 0) + 1
+      })
+      const colors = { '답변완료': '#4A6355', '처리중': '#7A9B88', '미답변': '#C45C5C' }
+      finalCsStatusData = Object.entries(statusMap).map(([name, value]) => ({
+        name,
+        value,
+        color: colors[name] || '#7A9B88',
+      }))
+    }
+
+    const totalCS = finalCsStatusData.reduce((sum, d) => sum + d.value, 0)
+
+    console.log('[API MAP] orders output:', { totalCS, unansweredCount })
 
     return {
-      csStatusData: csStatusData.length ? csStatusData : null,
+      csStatusData: finalCsStatusData.length ? finalCsStatusData : null,
       unansweredCS: unansweredCS.length ? unansweredCS : null,
       claimData: claimData.length ? claimData : null,
       satisfactionData: satisfactionData.length ? satisfactionData : null,
@@ -269,35 +345,77 @@ export function mapProductsData(apiData) {
 export function mapRankingData(apiData) {
   if (!apiData) return null
   try {
+    console.log('[API MAP] ranking input:', apiData)
     const items = Array.isArray(apiData) ? apiData : apiData.data || []
-    return items.map(d => ({
+    const mapped = items.map(d => ({
       ...d,
+      rank: toNumber(d.rank),
       today_sales: toNumber(d.today_sales),
       est_daily_revenue: toNumber(d.est_daily_revenue),
       weekly_sales: toNumber(d.weekly_sales),
       est_weekly_revenue: toNumber(d.est_weekly_revenue),
       total_reviews: toNumber(d.total_reviews),
     }))
+    console.log('[API MAP] ranking output:', mapped.length, 'items')
+    return mapped
   } catch (e) {
     console.warn('[API] Ranking data mapping failed:', e)
     return null
   }
 }
 
-// Competitors data pass-through with number conversion
+// Competitors data: group by brand_name, with number conversion
 export function mapCompetitorsData(apiData) {
   if (!apiData) return null
   try {
+    console.log('[API MAP] competitors input:', apiData)
+
+    let brands = []
+
     if (Array.isArray(apiData)) {
-      return apiData.map(brand => ({
-        ...brand,
-        daily_data: (brand.daily_data || []).map(d => ({
-          ...d,
-          est_daily_revenue: toNumber(d.est_daily_revenue || d.revenue),
-        })),
-      }))
+      // Check if it's flat daily records that need grouping by brand_name
+      if (apiData.length > 0 && apiData[0].brand_name && !apiData[0].daily_data) {
+        // Flat records: group by brand_name
+        const brandMap = {}
+        apiData.forEach(d => {
+          const name = d.brand_name
+          if (!brandMap[name]) {
+            brandMap[name] = {
+              brand_name: name,
+              is_dcurvin: d.is_dcurvin || name.toLowerCase().includes('dcurvin') || name.toLowerCase().includes('디커빈'),
+              daily_data: [],
+            }
+          }
+          brandMap[name].daily_data.push({
+            date: formatDateKST(d.date) || d.date,
+            est_daily_revenue: toNumber(d.est_daily_revenue || d.revenue || d.daily_revenue || 0),
+            today_sales: toNumber(d.today_sales || d.sales || 0),
+          })
+        })
+        brands = Object.values(brandMap)
+        // Sort daily_data by date within each brand
+        brands.forEach(b => {
+          b.daily_data.sort((a, b2) => {
+            const pa = (a.date || '').split('/').map(Number)
+            const pb = (b2.date || '').split('/').map(Number)
+            return (pa[0] * 100 + (pa[1] || 0)) - (pb[0] * 100 + (pb[1] || 0))
+          })
+        })
+      } else {
+        // Already grouped by brand
+        brands = apiData.map(brand => ({
+          ...brand,
+          daily_data: (brand.daily_data || []).map(d => ({
+            ...d,
+            date: formatDateKST(d.date) || d.date,
+            est_daily_revenue: toNumber(d.est_daily_revenue || d.revenue),
+          })),
+        }))
+      }
     }
-    return apiData
+
+    console.log('[API MAP] competitors output:', brands.length, 'brands')
+    return brands.length ? brands : apiData
   } catch (e) {
     console.warn('[API] Competitors data mapping failed:', e)
     return null

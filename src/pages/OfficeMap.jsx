@@ -22,6 +22,9 @@ const teamCards = [
   { id: 'haeun', path: '/secretary', preview: '핵심 의사결정 2건 · 미확인 메일 2건' },
 ]
 
+// Sage Mineral palette for competitor lines
+const COMP_COLORS = ['#2A3B32', '#6B8A5E', '#8EBAA4', '#5B7A6A', '#7A9B88', '#4A6355']
+
 function TitleBadge({ title, color }) {
   return (
     <span className="ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-semibold text-white"
@@ -83,10 +86,11 @@ function SalesMiniChart({ salesData }) {
   const recentDailySales = salesData?.recentDailySales || mockRecentSales
   return (
     <Card title="최근 7일 매출" icon="📊" delay={0.3}>
-      <ResponsiveContainer width="100%" height={80}>
+      <ResponsiveContainer width="100%" height={200}>
         <BarChart data={recentDailySales} barCategoryGap={3}>
           <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#7A9B88' }} axisLine={false} tickLine={false} />
-          <Tooltip formatter={v => `₩${v.toLocaleString()}`} contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #C6D5CC' }} />
+          <YAxis tick={{ fontSize: 10, fill: '#7A9B88' }} tickFormatter={v => `${(v / 1e6).toFixed(0)}M`} axisLine={false} tickLine={false} width={40} />
+          <Tooltip formatter={v => `₩${Number(v).toLocaleString()}`} contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #C6D5CC' }} />
           <Bar dataKey="sales" radius={[3, 3, 0, 0]}>
             {recentDailySales.map((entry, i) => (
               <Cell key={i} fill={entry.isToday ? '#2A3B32' : '#C6D5CC'} />
@@ -94,9 +98,9 @@ function SalesMiniChart({ salesData }) {
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-      <div className="flex items-center justify-between mt-1">
+      <div className="flex items-center justify-between mt-2">
         <span className="text-[10px]" style={{ color: '#C6D5CC' }}>7일 전</span>
-        <span className="text-[11px] font-semibold tabular-nums" style={{ color: '#2A3B32' }}>오늘: ₩{recentDailySales[recentDailySales.length - 1].sales.toLocaleString()}</span>
+        <span className="text-[12px] font-semibold tabular-nums" style={{ color: '#2A3B32' }}>오늘: ₩{Number(recentDailySales[recentDailySales.length - 1]?.sales || 0).toLocaleString()}</span>
       </div>
     </Card>
   )
@@ -208,27 +212,30 @@ function CompetitorChart({ competitorsRaw, compLoading, onClick }) {
   let chartData = mockCompetitorWeekly
   let insight = mockCompetitorInsight
   let brandNames = []
+  let lineColors = [...COMP_COLORS]
 
   if (competitorsRaw && !compLoading) {
     try {
-      if (Array.isArray(competitorsRaw)) {
+      if (Array.isArray(competitorsRaw) && competitorsRaw.length > 0) {
         const dcurvin = competitorsRaw.find(b => b.is_dcurvin)
-        const others = competitorsRaw.filter(b => !b.is_dcurvin).slice(0, 2)
-        brandNames = [dcurvin, ...others].filter(Boolean).map(b => b.brand_name)
+        const others = competitorsRaw.filter(b => !b.is_dcurvin).slice(0, 4)
+        const allBrands = [dcurvin, ...others].filter(Boolean)
+        brandNames = allBrands.map(b => b.brand_name)
 
         if (dcurvin?.daily_data?.length) {
-          chartData = dcurvin.daily_data.slice(-7).map((d, i) => {
+          const dayCount = Math.min(dcurvin.daily_data.length, 7)
+          chartData = dcurvin.daily_data.slice(-dayCount).map((d, i) => {
             const entry = { date: d.date || `Day${i + 1}` }
-            entry.dcurvin = Number(d.est_daily_revenue || d.revenue || 0)
+            entry['brand_0'] = Number(d.est_daily_revenue || d.revenue || 0)
             others.forEach((ob, oi) => {
-              const obDay = ob.daily_data?.[i]
-              entry[`comp${oi}`] = Number(obDay?.est_daily_revenue || obDay?.revenue || 0)
+              const obDay = ob.daily_data?.[ob.daily_data.length - dayCount + i]
+              entry[`brand_${oi + 1}`] = Number(obDay?.est_daily_revenue || obDay?.revenue || 0)
             })
             return entry
           })
 
-          const lastDcurvin = chartData[chartData.length - 1]?.dcurvin || 0
-          const lastComp = chartData[chartData.length - 1]?.comp0 || 0
+          const lastDcurvin = chartData[chartData.length - 1]?.['brand_0'] || 0
+          const lastComp = chartData[chartData.length - 1]?.['brand_1'] || 0
           insight = lastDcurvin > lastComp
             ? `D.CURVIN이 최근 일 매출 기준 경쟁사를 추월했습니다.`
             : `경쟁사 대비 D.CURVIN의 매출 격차를 좁혀가고 있습니다.`
@@ -239,9 +246,10 @@ function CompetitorChart({ competitorsRaw, compLoading, onClick }) {
     }
   }
 
-  const hasComp0 = chartData.some(d => d.comp0 !== undefined)
-  const hasComp1 = chartData.some(d => d.comp1 !== undefined)
+  // Determine which brand keys exist
+  const brandKeys = Object.keys(chartData[0] || {}).filter(k => k.startsWith('brand_'))
   const hasWeekKey = chartData.some(d => d.week !== undefined)
+  const hasOldFormat = chartData.some(d => d.dcurvin !== undefined)
   const xKey = hasWeekKey ? 'week' : 'date'
 
   return (
@@ -253,20 +261,35 @@ function CompetitorChart({ competitorsRaw, compLoading, onClick }) {
         <h3 className="text-[14px] font-semibold" style={{ color: '#2A3B32' }}>📈 경쟁사 매출 추이 — 최근 7일</h3>
         <span className="text-[11px]" style={{ color: '#7A9B88' }}>상세 보기 →</span>
       </div>
-      <ResponsiveContainer width="100%" height={160}>
+      <ResponsiveContainer width="100%" height={220}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: '#7A9B88' }} axisLine={false} tickLine={false} />
           <YAxis tick={{ fontSize: 10, fill: '#7A9B88' }} tickFormatter={v => `${(v / 1e6).toFixed(0)}M`} axisLine={false} tickLine={false} />
           <Tooltip formatter={v => `₩${Number(v).toLocaleString()}`} contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #C6D5CC' }} />
           <Legend wrapperStyle={{ fontSize: '11px' }} />
-          <Line type="monotone" dataKey="dcurvin" name={brandNames[0] || 'D.CURVIN'} stroke="#2A3B32" strokeWidth={2.5} dot={{ r: 3 }} />
-          {(hasComp0 || !hasWeekKey) && (
-            <Line type="monotone" dataKey={hasComp0 ? 'comp0' : 'compA'} name={brandNames[1] || '경쟁사 A'} stroke="#7A9B88" strokeWidth={1.5} dot={{ r: 2 }} strokeDasharray="4 2" />
-          )}
-          {(hasComp1 || (!hasWeekKey && chartData[0]?.compB !== undefined)) && (
-            <Line type="monotone" dataKey={hasComp1 ? 'comp1' : 'compB'} name={brandNames[2] || '경쟁사 B'} stroke="#C6D5CC" strokeWidth={1.5} dot={{ r: 2 }} strokeDasharray="4 2" />
-          )}
+          {brandKeys.length > 0 ? (
+            // New format: brand_0, brand_1, brand_2, ...
+            brandKeys.map((key, idx) => (
+              <Line key={key} type="monotone" dataKey={key}
+                name={brandNames[idx] || (idx === 0 ? 'D.CURVIN' : `경쟁사 ${idx}`)}
+                stroke={lineColors[idx % lineColors.length]}
+                strokeWidth={idx === 0 ? 2.5 : 1.5}
+                dot={{ r: idx === 0 ? 3 : 2 }}
+                strokeDasharray={idx === 0 ? undefined : '4 2'} />
+            ))
+          ) : hasOldFormat ? (
+            // Old mock format: dcurvin, compA, compB
+            <>
+              <Line type="monotone" dataKey="dcurvin" name={brandNames[0] || 'D.CURVIN'} stroke="#2A3B32" strokeWidth={2.5} dot={{ r: 3 }} />
+              {chartData.some(d => d.compA !== undefined) && (
+                <Line type="monotone" dataKey="compA" name={brandNames[1] || '경쟁사 A'} stroke="#6B8A5E" strokeWidth={1.5} dot={{ r: 2 }} strokeDasharray="4 2" />
+              )}
+              {chartData.some(d => d.compB !== undefined) && (
+                <Line type="monotone" dataKey="compB" name={brandNames[2] || '경쟁사 B'} stroke="#8EBAA4" strokeWidth={1.5} dot={{ r: 2 }} strokeDasharray="4 2" />
+              )}
+            </>
+          ) : null}
         </LineChart>
       </ResponsiveContainer>
       <p className="text-[12px] mt-2" style={{ color: '#4A6355' }}>{insight}</p>
@@ -280,11 +303,11 @@ export default function OfficeMap() {
   const { data: apiData, loading, error, refresh } = useApiData()
 
   // KPI values: API → fallback
-  const todaySales = apiData?.sales?.todaySales || 4280000
-  const todayOrders = apiData?.sales?.todayOrders || 342
-  const salesChange = apiData?.sales?.salesChange || 8.4
-  const unansweredCount = apiData?.orders?.unansweredCount || 8
-  const dangerItemCount = apiData?.inventory?.inventoryGauge?.dangerItems || 5
+  const todaySales = apiData?.sales?.todaySales || 0
+  const todayOrders = apiData?.sales?.todayOrders || 0
+  const salesChange = apiData?.sales?.salesChange || 0
+  const unansweredCount = apiData?.orders?.unansweredCount || 0
+  const dangerItemCount = apiData?.inventory?.inventoryGauge?.dangerItems || 0
 
   return (
     <div className="space-y-6">
@@ -299,42 +322,39 @@ export default function OfficeMap() {
         </div>
       </motion.div>
 
-      {/* KPIs + Exchange Rate in a row */}
+      {/* KPIs + Exchange Rate — bigger numbers, wider spacing */}
       {loading && !apiData ? (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
           {[0,1,2,3,4].map(i => <SkeletonKpi key={i} delay={0.05 + i * 0.05} />)}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
           <KpiCard label="오늘 매출" value={todaySales} prefix="₩" change={salesChange} icon="💰" delay={0.05} />
-          <KpiCard label="총 주문" value={todayOrders} suffix="건" change={5.2} icon="📦" delay={0.1} />
-          <KpiCard label="미답변 CS" value={unansweredCount} suffix="건" change={-12.5} icon="💬" delay={0.15} />
-          <KpiCard label="N배송 품절" value={dangerItemCount} suffix="종" change={-20} icon="⚠️" delay={0.2} />
+          <KpiCard label="총 주문" value={todayOrders} suffix="건" icon="📦" delay={0.1} />
+          <KpiCard label="미답변 CS" value={unansweredCount} suffix="건" icon="💬" delay={0.15} />
+          <KpiCard label="N배송 품절" value={dangerItemCount} suffix="종" icon="⚠️" delay={0.2} />
           <ExchangeWidget />
         </div>
       )}
 
-      {/* ═══ 2. 일일 퀘스트 섹션 ═══ */}
-      <DailyQuests />
-
-      {/* ═══ 3. 매출 미니차트 + 경쟁사 추이 (2열) ═══ */}
+      {/* ═══ 2. 매출 미니차트 + 경쟁사 추이 (2열) ═══ */}
       {loading && !apiData ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SkeletonCard height={120} lines={1} delay={0.3} />
-          <SkeletonCard height={160} lines={1} delay={0.35} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <SkeletonCard height={200} lines={1} delay={0.3} />
+          <SkeletonCard height={220} lines={1} delay={0.35} />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-4">
-            <SalesMiniChart salesData={apiData?.sales} />
-            <InventoryWidget inventoryData={apiData?.inventory} />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <SalesMiniChart salesData={apiData?.sales} />
           <CompetitorChart competitorsRaw={apiData?.competitors} compLoading={loading} onClick={() => navigate('/management')} />
         </div>
       )}
 
+      {/* ═══ 3. N배송 품절 예상 ═══ */}
+      <InventoryWidget inventoryData={apiData?.inventory} />
+
       {/* ═══ 4. 팀 카드 그리드 ═══ */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {teamCards.map((tc, i) => {
           const char = characters[tc.id]
           return (
@@ -410,7 +430,10 @@ export default function OfficeMap() {
         </motion.div>
       </div>
 
-      {/* ═══ 5. 당일 매출 순위 + 최근 의사결정 ═══ */}
+      {/* ═══ 5. 오늘의 퀘스트 (팀 카드 아래로 이동) ═══ */}
+      <DailyQuests />
+
+      {/* ═══ 6. 당일 매출 순위 (맨 하단) ═══ */}
       <RankingTable rankingData={apiData?.ranking} loading={loading && !apiData} />
 
       {decisions.length > 0 && (
