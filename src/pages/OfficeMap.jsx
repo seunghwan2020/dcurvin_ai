@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, Legend } from 'recharts'
 import SVGAvatar from '../components/SVGAvatar'
 import KpiCard from '../components/KpiCard'
 import DailyQuests from '../components/DailyQuests'
@@ -8,9 +8,11 @@ import Card from '../components/Card'
 import CountUp from '../components/CountUp'
 import { DataStatusBadge, SkeletonKpi } from '../components/SkeletonCard'
 import SkeletonCard from '../components/SkeletonCard'
-import { characters, exchangeRateData, recentDailySales as mockRecentSales, inventoryGauge as mockInventoryGauge, competitorWeeklyData, competitorInsight } from '../data/mockData'
+import { characters, recentDailySales as mockRecentSales, inventoryGauge as mockInventoryGauge, competitorWeeklyData as mockCompetitorWeekly, competitorInsight as mockCompetitorInsight } from '../data/mockData'
 import { useGame } from '../context/GameContext'
 import { useApiData } from '../hooks/useApiData'
+import { useExchangeRate } from '../hooks/useExchangeRate'
+import { useRankingData, useCompetitorsData, formatManwon, getRankBadge } from '../hooks/useRankingData'
 
 const teamCards = [
   { id: 'yujin', path: '/management', preview: '이번 달 매출 1.18억 · 전월비 +12.8%' },
@@ -29,14 +31,31 @@ function TitleBadge({ title, color }) {
   )
 }
 
-/* 위안화 환율 위젯 — stays mockData (no API yet) */
+/* ── 위안화 환율 위젯 — LIVE API ── */
 function ExchangeWidget() {
-  const { label, current, previous, change, direction, weekly } = exchangeRateData
+  const { data, loading } = useExchangeRate()
+
+  if (loading || !data) {
+    return (
+      <Card title="위안화 (CNY→KRW)" icon="💱" delay={0.25}>
+        <div className="animate-pulse space-y-2">
+          <div className="h-7 bg-[#C6D5CC]/30 rounded w-24" />
+          <div className="h-3 bg-[#C6D5CC]/20 rounded w-32" />
+          <div className="h-12 bg-[#C6D5CC]/15 rounded w-full" />
+        </div>
+      </Card>
+    )
+  }
+
+  const { label, current, previous, change, direction, weekly, isLive } = data
   return (
     <Card title={label} icon="💱" delay={0.25}>
       <div className="flex items-end justify-between mb-2">
         <div>
-          <p className="text-2xl font-semibold tabular-nums" style={{ color: '#2A3B32' }}>₩<CountUp end={current} decimals={1} /></p>
+          <div className="flex items-center gap-2">
+            <p className="text-2xl font-semibold tabular-nums" style={{ color: '#2A3B32' }}>₩<CountUp end={current} decimals={1} /></p>
+            {!isLive && <span className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#C6D5CC]/20" style={{ color: '#7A9B88' }}>추정</span>}
+          </div>
           <p className="text-[12px] font-medium" style={{ color: direction === 'up' ? '#C45C5C' : '#4A6355' }}>
             {direction === 'up' ? '▲' : '▼'} {change}% <span style={{ color: '#7A9B88' }}>전일 ₩{previous}</span>
           </p>
@@ -45,7 +64,7 @@ function ExchangeWidget() {
       <ResponsiveContainer width="100%" height={50}>
         <LineChart data={weekly}>
           <Line type="monotone" dataKey="rate" stroke={direction === 'up' ? '#C45C5C' : '#4A6355'} strokeWidth={2} dot={false} />
-          <Tooltip formatter={v => `₩${v}`} contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #C6D5CC' }} />
+          <Tooltip formatter={v => `₩${Number(v).toFixed(1)}`} contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #C6D5CC' }} />
         </LineChart>
       </ResponsiveContainer>
       <div className="flex justify-between text-[10px] mt-1" style={{ color: '#7A9B88' }}>
@@ -55,7 +74,7 @@ function ExchangeWidget() {
   )
 }
 
-/* 매출 미니차트 (7일) — uses API data with fallback */
+/* ── 매출 미니차트 (7일) ── */
 function SalesMiniChart({ salesData }) {
   const recentDailySales = salesData?.recentDailySales || mockRecentSales
   return (
@@ -79,7 +98,7 @@ function SalesMiniChart({ salesData }) {
   )
 }
 
-/* N배송 품절 예상 — uses API data with fallback */
+/* ── N배송 품절 예상 ── */
 function InventoryWidget({ inventoryData }) {
   const gauge = inventoryData?.inventoryGauge || mockInventoryGauge
   const { dangerItems, alertText, dangerList } = gauge
@@ -105,28 +124,159 @@ function InventoryWidget({ inventoryData }) {
   )
 }
 
-/* 시장 동향 — 경쟁사 비교 (stays mockData) */
+/* ── 당일 매출 순위 테이블 ── */
+function RankingTable() {
+  const { data: rankingData, loading, error } = useRankingData()
+
+  if (loading) {
+    return <SkeletonCard title="당일 매출 순위" icon="🏆" height={200} lines={5} delay={0.55} />
+  }
+
+  if (error || !rankingData || !rankingData.length) {
+    return null // API 실패 시 위젯 숨김
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
+      className="bg-white/80 backdrop-blur-xl rounded-2xl border p-5"
+      style={{ borderColor: 'rgba(198,213,204,0.5)', boxShadow: '0 1px 12px rgba(42,59,50,0.04)' }}>
+      <h3 className="text-[14px] font-semibold mb-4 flex items-center gap-2" style={{ color: '#2A3B32' }}>
+        🏆 당일 매출 순위
+      </h3>
+      <div className="overflow-x-auto">
+        <table className="w-full text-[12px]">
+          <thead>
+            <tr className="border-b border-gray-100">
+              {['순위', '브랜드', '오늘 판매', '추정 당일 매출', '주간 판매', '추정 주간 매출', '리뷰'].map(h => (
+                <th key={h} className="py-2 px-2 text-[11px] text-gray-400 font-medium text-left whitespace-nowrap">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rankingData.map((item, i) => {
+              const isDcurvin = item.is_dcurvin
+              const badge = getRankBadge(item.rank)
+              return (
+                <motion.tr key={item.brand_name || i}
+                  initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.6 + i * 0.03 }}
+                  className={`border-b border-gray-50 transition-colors ${isDcurvin ? 'bg-[#2A3B32]/[0.04]' : 'hover:bg-gray-50/30'}`}
+                  style={isDcurvin ? { borderLeft: '3px solid #2A3B32' } : {}}>
+                  <td className="py-2.5 px-2 whitespace-nowrap">
+                    {badge.emoji ? (
+                      <span className="text-[14px]">{badge.emoji}</span>
+                    ) : (
+                      <span className="text-[12px] font-bold text-gray-400">#{item.rank}</span>
+                    )}
+                  </td>
+                  <td className="py-2.5 px-2 whitespace-nowrap">
+                    <span className={`text-[12px] ${isDcurvin ? 'font-bold' : 'text-gray-600'}`}
+                      style={isDcurvin ? { color: '#2A3B32' } : {}}>
+                      {isDcurvin && <span className="mr-1">🔥</span>}
+                      {item.brand_name}
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-2 tabular-nums text-gray-600 whitespace-nowrap">
+                    {Number(item.today_sales || 0).toLocaleString()}개
+                  </td>
+                  <td className={`py-2.5 px-2 tabular-nums font-medium whitespace-nowrap ${isDcurvin ? 'text-[#2A3B32]' : 'text-gray-700'}`}>
+                    {item.est_daily_revenue_formatted || formatManwon(item.est_daily_revenue)}
+                  </td>
+                  <td className="py-2.5 px-2 tabular-nums text-gray-600 whitespace-nowrap">
+                    {Number(item.weekly_sales || 0).toLocaleString()}개
+                  </td>
+                  <td className={`py-2.5 px-2 tabular-nums font-medium whitespace-nowrap ${isDcurvin ? 'text-[#2A3B32]' : 'text-gray-700'}`}>
+                    {item.est_weekly_revenue_formatted || formatManwon(item.est_weekly_revenue)}
+                  </td>
+                  <td className="py-2.5 px-2 tabular-nums text-gray-400 whitespace-nowrap">
+                    {Number(item.total_reviews || 0).toLocaleString()}
+                  </td>
+                </motion.tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  )
+}
+
+/* ── 경쟁사 매출 추이 라인차트 — LIVE API with fallback ── */
 function CompetitorChart({ onClick }) {
+  const { data: competitorsRaw, loading: compLoading } = useCompetitorsData()
+
+  // Transform competitors API data into chart format
+  let chartData = mockCompetitorWeekly
+  let insight = mockCompetitorInsight
+  let brandNames = []
+
+  if (competitorsRaw && !compLoading) {
+    try {
+      // Expect: array of { brand_name, daily_data: [{ date, est_daily_revenue }], is_dcurvin }
+      // Or: { brands: [...], daily: [...] }
+      if (Array.isArray(competitorsRaw)) {
+        const dcurvin = competitorsRaw.find(b => b.is_dcurvin)
+        const others = competitorsRaw.filter(b => !b.is_dcurvin).slice(0, 2)
+        brandNames = [dcurvin, ...others].filter(Boolean).map(b => b.brand_name)
+
+        // Build chart from daily_data
+        if (dcurvin?.daily_data?.length) {
+          chartData = dcurvin.daily_data.slice(-7).map((d, i) => {
+            const entry = { date: d.date || `Day${i + 1}` }
+            entry.dcurvin = Number(d.est_daily_revenue || d.revenue || 0)
+            others.forEach((ob, oi) => {
+              const obDay = ob.daily_data?.[i]
+              entry[`comp${oi}`] = Number(obDay?.est_daily_revenue || obDay?.revenue || 0)
+            })
+            return entry
+          })
+
+          const lastDcurvin = chartData[chartData.length - 1]?.dcurvin || 0
+          const lastComp = chartData[chartData.length - 1]?.comp0 || 0
+          if (lastDcurvin > lastComp) {
+            insight = `D.CURVIN이 최근 일 매출 기준 경쟁사를 추월했습니다.`
+          } else {
+            insight = `경쟁사 대비 D.CURVIN의 매출 격차를 좁혀가고 있습니다.`
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[Competitors] Chart mapping failed:', e)
+    }
+  }
+
+  // Determine data keys based on what we have
+  const hasComp0 = chartData.some(d => d.comp0 !== undefined)
+  const hasComp1 = chartData.some(d => d.comp1 !== undefined)
+  const hasWeekKey = chartData.some(d => d.week !== undefined)
+  const xKey = hasWeekKey ? 'week' : 'date'
+
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
       onClick={onClick}
       className="bg-white/80 backdrop-blur-xl rounded-2xl border p-5 cursor-pointer hover:shadow-md transition-all"
       style={{ borderColor: 'rgba(198,213,204,0.5)', boxShadow: '0 1px 12px rgba(42,59,50,0.04)' }}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-[14px] font-semibold" style={{ color: '#2A3B32' }}>📈 시장 동향 — 주간 매출 비교</h3>
+        <h3 className="text-[14px] font-semibold" style={{ color: '#2A3B32' }}>📈 경쟁사 매출 추이 — 최근 7일</h3>
         <span className="text-[11px]" style={{ color: '#7A9B88' }}>상세 보기 →</span>
       </div>
       <ResponsiveContainer width="100%" height={160}>
-        <LineChart data={competitorWeeklyData}>
-          <XAxis dataKey="week" tick={{ fontSize: 11, fill: '#7A9B88' }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 10, fill: '#7A9B88' }} tickFormatter={v => `${(v/1e6).toFixed(0)}M`} axisLine={false} tickLine={false} />
-          <Tooltip formatter={v => `₩${v.toLocaleString()}`} contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #C6D5CC' }} />
-          <Line type="monotone" dataKey="dcurvin" name="D.CURVIN" stroke="#2A3B32" strokeWidth={2.5} dot={{ r: 3 }} />
-          <Line type="monotone" dataKey="compA" name="경쟁사 A" stroke="#7A9B88" strokeWidth={1.5} dot={{ r: 2 }} strokeDasharray="4 2" />
-          <Line type="monotone" dataKey="compB" name="경쟁사 B" stroke="#C6D5CC" strokeWidth={1.5} dot={{ r: 2 }} strokeDasharray="4 2" />
+        <LineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: '#7A9B88' }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 10, fill: '#7A9B88' }} tickFormatter={v => `${(v / 1e6).toFixed(0)}M`} axisLine={false} tickLine={false} />
+          <Tooltip formatter={v => `₩${Number(v).toLocaleString()}`} contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #C6D5CC' }} />
+          <Legend wrapperStyle={{ fontSize: '11px' }} />
+          <Line type="monotone" dataKey="dcurvin" name={brandNames[0] || 'D.CURVIN'} stroke="#2A3B32" strokeWidth={2.5} dot={{ r: 3 }} />
+          {(hasComp0 || !hasWeekKey) && (
+            <Line type="monotone" dataKey={hasComp0 ? 'comp0' : 'compA'} name={brandNames[1] || '경쟁사 A'} stroke="#7A9B88" strokeWidth={1.5} dot={{ r: 2 }} strokeDasharray="4 2" />
+          )}
+          {(hasComp1 || (!hasWeekKey && chartData[0]?.compB !== undefined)) && (
+            <Line type="monotone" dataKey={hasComp1 ? 'comp1' : 'compB'} name={brandNames[2] || '경쟁사 B'} stroke="#C6D5CC" strokeWidth={1.5} dot={{ r: 2 }} strokeDasharray="4 2" />
+          )}
         </LineChart>
       </ResponsiveContainer>
-      <p className="text-[12px] mt-2" style={{ color: '#4A6355' }}>{competitorInsight}</p>
+      <p className="text-[12px] mt-2" style={{ color: '#4A6355' }}>{insight}</p>
     </motion.div>
   )
 }
@@ -259,8 +409,11 @@ export default function OfficeMap() {
         </motion.div>
       </div>
 
-      {/* Competitor Chart + Bottom row */}
+      {/* Competitor Chart (LIVE) */}
       <CompetitorChart onClick={() => navigate('/management')} />
+
+      {/* Daily Ranking Table (LIVE) */}
+      <RankingTable />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <DailyQuests />
