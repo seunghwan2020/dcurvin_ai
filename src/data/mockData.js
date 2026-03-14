@@ -31,10 +31,10 @@ export const exchangeRateData = {
 
 // ── 최근 7일 매출 (미니차트용) ──
 export const recentDailySales = Array.from({ length: 7 }, (_, i) => {
-  const d = new Date(2026, 2, 3 + i)
-  const base = 3_800_000 + Math.sin(i / 2) * 800_000
+  const d = new Date(2026, 2, 8 + i)
+  const base = 7_000_000 + Math.sin(i / 2) * 800_000
   const isToday = i === 6
-  return { date: `${d.getMonth()+1}/${d.getDate()}`, sales: Math.round(base + (Math.random()-0.3)*400_000), isToday }
+  return { date: `${d.getMonth()+1}/${d.getDate()}`, sales: Math.round(base + (Math.random()-0.3)*500_000), isToday }
 })
 
 // ── N배송 품절 예상 ──
@@ -51,10 +51,10 @@ export const inventoryGauge = {
 
 // ── 경쟁사 비교 (주간 추이) ──
 export const competitorWeeklyData = [
-  { week: 'W9', dcurvin: 27_500_000, compA: 31_000_000, compB: 22_000_000 },
-  { week: 'W10', dcurvin: 29_200_000, compA: 29_800_000, compB: 21_500_000 },
-  { week: 'W11', dcurvin: 31_500_000, compA: 30_200_000, compB: 23_000_000 },
-  { week: 'W12', dcurvin: 33_800_000, compA: 31_500_000, compB: 22_800_000 },
+  { week: 'W9', dcurvin: 46_500_000, compA: 52_000_000, compB: 38_000_000 },
+  { week: 'W10', dcurvin: 49_200_000, compA: 50_500_000, compB: 37_000_000 },
+  { week: 'W11', dcurvin: 51_800_000, compA: 50_800_000, compB: 39_500_000 },
+  { week: 'W12', dcurvin: 48_600_000, compA: 49_000_000, compB: 38_200_000 },
 ]
 export const competitorInsight = 'D.CURVIN이 W12에 경쟁사 A를 추월하며 주간 매출 1위를 기록했습니다.'
 
@@ -76,30 +76,30 @@ export const productInfo = {
 
 // ── 경영지원팀 (유진) ──
 export const dailySalesData = Array.from({ length: 30 }, (_, i) => {
-  const d = new Date(2026, 1, 8 + i)
-  const base = 3_500_000 + Math.sin(i / 3) * 1_200_000
-  const wknd = (d.getDay() === 0 || d.getDay() === 6) ? 800_000 : 0
-  return { date: `${d.getMonth()+1}/${d.getDate()}`, sales: Math.round(base + wknd + (Math.random()-0.3)*600_000), orders: Math.round(35 + Math.random()*30), profit: Math.round((base+wknd)*0.35) }
+  const d = new Date(2026, 1, 13 + i)
+  const base = 7_000_000 + Math.sin(i / 3) * 1_500_000
+  const wknd = (d.getDay() === 0 || d.getDay() === 6) ? 1_200_000 : 0
+  return { date: `${d.getMonth()+1}/${d.getDate()}`, sales: Math.round(base + wknd + (Math.random()-0.3)*800_000), orders: Math.round(55 + Math.random()*40), profit: Math.round((base+wknd)*0.35) }
 })
 export const weeklySalesData = [
-  { week: '1주차', sales: 24_800_000, orders: 285, growth: 0 },
-  { week: '2주차', sales: 27_200_000, orders: 312, growth: 9.7 },
-  { week: '3주차', sales: 31_500_000, orders: 358, growth: 15.8 },
-  { week: '4주차', sales: 28_900_000, orders: 330, growth: -8.3 },
+  { week: '1주차', sales: 46_500_000, orders: 385, growth: 0 },
+  { week: '2주차', sales: 49_200_000, orders: 412, growth: 5.8 },
+  { week: '3주차', sales: 51_800_000, orders: 438, growth: 5.3 },
+  { week: '4주차', sales: 48_600_000, orders: 405, growth: -6.2 },
 ]
 export const monthlySalesData = [
-  { month: '2025.10', sales: 98_000_000, profit: 34_300_000 },
-  { month: '2025.11', sales: 112_000_000, profit: 39_200_000 },
-  { month: '2025.12', sales: 145_000_000, profit: 50_750_000 },
-  { month: '2026.01', sales: 88_000_000, profit: 30_800_000 },
-  { month: '2026.02', sales: 105_000_000, profit: 36_750_000 },
-  { month: '2026.03', sales: 118_400_000, profit: 41_440_000 },
+  { month: '2025.10', sales: 168_000_000, profit: 58_800_000 },
+  { month: '2025.11', sales: 185_000_000, profit: 64_750_000 },
+  { month: '2025.12', sales: 225_000_000, profit: 78_750_000 },
+  { month: '2026.01', sales: 178_000_000, profit: 62_300_000 },
+  { month: '2026.02', sales: 195_000_000, profit: 68_250_000 },
+  { month: '2026.03', sales: 210_000_000, profit: 73_500_000 },
 ]
 export const productSalesShare = [
-  { name: 'Edge V2', value: 35, amount: 41_440_000, color: '#2A3B32' },
-  { name: 'Eddy V2', value: 25, amount: 29_600_000, color: '#4A6355' },
-  { name: 'Guardian', value: 22, amount: 26_048_000, color: '#7A9B88' },
-  { name: 'ConnectBag', value: 18, amount: 21_312_000, color: '#8EBAA4' },
+  { name: 'Edge V2', value: 35, amount: 73_500_000, color: '#2A3B32' },
+  { name: 'Eddy V2', value: 25, amount: 52_500_000, color: '#4A6355' },
+  { name: 'Guardian', value: 22, amount: 46_200_000, color: '#7A9B88' },
+  { name: 'ConnectBag', value: 18, amount: 37_800_000, color: '#8EBAA4' },
 ]
 export const colorTrendData = [
   { month: '10월', bright: 42, dark: 58 }, { month: '11월', bright: 45, dark: 55 },
@@ -114,15 +114,15 @@ export const colorDetailData = [
 ]
 export const salesForecastData = Array.from({ length: 30 }, (_, i) => {
   const d = new Date(2026, 2, 10 + i)
-  const base = 4_000_000 + Math.sin(i/5)*800_000 + i*30_000
+  const base = 7_000_000 + Math.sin(i/5)*1_200_000 + i*50_000
   return { date: `${d.getMonth()+1}/${d.getDate()}`, predicted: Math.round(base), upper: Math.round(base*1.15), lower: Math.round(base*0.85) }
 })
 export const competitorData = [
-  { name: 'D.CURVIN', sales: 118, share: 8.2, rank: 4, color: '#2A3B32', highlight: true },
-  { name: 'A사', sales: 320, share: 22.1, rank: 1, color: '#7A9B88' },
-  { name: 'B사', sales: 185, share: 12.8, rank: 2, color: '#7A9B88' },
-  { name: 'C사', sales: 142, share: 9.8, rank: 3, color: '#7A9B88' },
-  { name: 'D사', sales: 95, share: 6.6, rank: 5, color: '#7A9B88' },
+  { name: 'D.CURVIN', sales: 210, share: 12.5, rank: 3, color: '#2A3B32', highlight: true },
+  { name: 'A사', sales: 380, share: 22.6, rank: 1, color: '#7A9B88' },
+  { name: 'B사', sales: 245, share: 14.6, rank: 2, color: '#7A9B88' },
+  { name: 'C사', sales: 165, share: 9.8, rank: 4, color: '#7A9B88' },
+  { name: 'D사', sales: 120, share: 7.1, rank: 5, color: '#7A9B88' },
 ]
 export const managementDecisions = [
   { id: 'mgmt_1', question: '봄 시즌 마케팅 예산을 어떻게 배분할까요?', context: '밝은 컬러 매출 급상승 중, 전체 매출 상승세',
