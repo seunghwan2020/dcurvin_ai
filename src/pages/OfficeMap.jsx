@@ -8,7 +8,7 @@ import Card from '../components/Card'
 import CountUp from '../components/CountUp'
 import { DataStatusBadge, SkeletonKpi } from '../components/SkeletonCard'
 import SkeletonCard from '../components/SkeletonCard'
-import { characters, recentDailySales as mockRecentSales, inventoryGauge as mockInventoryGauge, competitorWeeklyData as mockCompetitorWeekly, competitorInsight as mockCompetitorInsight } from '../data/mockData'
+import { characters, recentDailySales as mockRecentSales, inventoryGauge as mockInventoryGauge, competitorWeeklyData as mockCompetitorWeekly, competitorInsight as mockCompetitorInsight, csStatusData as mockCsStatus, unansweredCS as mockUnansweredCS } from '../data/mockData'
 import { useGame } from '../context/GameContext'
 import { useApiData } from '../hooks/useApiData'
 import { useExchangeRate } from '../hooks/useExchangeRate'
@@ -81,9 +81,9 @@ function ExchangeWidget() {
   )
 }
 
-/* ── 매출 미니차트 (7일) ── */
-function SalesMiniChart({ salesData }) {
-  const recentDailySales = salesData?.recentDailySales || mockRecentSales
+/* ── 매출 미니차트 (7일) — mock 데이터 사용 ── */
+function SalesMiniChart() {
+  const recentDailySales = mockRecentSales
   return (
     <Card title="최근 7일 매출" icon="📊" delay={0.3}>
       <ResponsiveContainer width="100%" height={200}>
@@ -302,12 +302,13 @@ export default function OfficeMap() {
   const { decisions } = useGame()
   const { data: apiData, loading, error, refresh } = useApiData()
 
-  // KPI values: API → fallback
-  const todaySales = apiData?.sales?.todaySales || 0
-  const todayOrders = apiData?.sales?.todayOrders || 0
-  const salesChange = apiData?.sales?.salesChange || 0
-  const unansweredCount = apiData?.orders?.unansweredCount || 0
-  const dangerItemCount = apiData?.inventory?.inventoryGauge?.dangerItems || 0
+  // KPI values: mock 기준 일매출 ~727만원
+  const mockLastDay = mockRecentSales[mockRecentSales.length - 1]
+  const todaySales = mockLastDay.sales   // 7,270,000
+  const todayOrders = 66
+  const salesChange = 2.1
+  const unansweredCount = apiData?.orders?.unansweredCount || mockUnansweredCS.length
+  const dangerItemCount = apiData?.inventory?.inventoryGauge?.dangerItems || mockInventoryGauge.dangerItems
 
   return (
     <div className="space-y-6">
@@ -345,7 +346,7 @@ export default function OfficeMap() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <SalesMiniChart salesData={apiData?.sales} />
+          <SalesMiniChart />
           <CompetitorChart competitorsRaw={apiData?.competitors} compLoading={loading} onClick={() => navigate('/management')} />
         </div>
       )}

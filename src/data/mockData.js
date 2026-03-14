@@ -30,12 +30,15 @@ export const exchangeRateData = {
 }
 
 // ── 최근 7일 매출 (미니차트용) ──
-export const recentDailySales = Array.from({ length: 7 }, (_, i) => {
-  const d = new Date(2026, 2, 8 + i)
-  const base = 7_000_000 + Math.sin(i / 2) * 800_000
-  const isToday = i === 6
-  return { date: `${d.getMonth()+1}/${d.getDate()}`, sales: Math.round(base + (Math.random()-0.3)*500_000), isToday }
-})
+export const recentDailySales = [
+  { date: '3/8', sales: 6_850_000, isToday: false },
+  { date: '3/9', sales: 7_320_000, isToday: false },
+  { date: '3/10', sales: 7_150_000, isToday: false },
+  { date: '3/11', sales: 6_980_000, isToday: false },
+  { date: '3/12', sales: 7_420_000, isToday: false },
+  { date: '3/13', sales: 7_580_000, isToday: false },
+  { date: '3/14', sales: 7_270_000, isToday: true },
+]
 
 // ── N배송 품절 예상 ──
 export const inventoryGauge = {
@@ -75,25 +78,51 @@ export const productInfo = {
 }
 
 // ── 경영지원팀 (유진) ──
-export const dailySalesData = Array.from({ length: 30 }, (_, i) => {
-  const d = new Date(2026, 1, 13 + i)
-  const base = 7_000_000 + Math.sin(i / 3) * 1_500_000
-  const wknd = (d.getDay() === 0 || d.getDay() === 6) ? 1_200_000 : 0
-  return { date: `${d.getMonth()+1}/${d.getDate()}`, sales: Math.round(base + wknd + (Math.random()-0.3)*800_000), orders: Math.round(55 + Math.random()*40), profit: Math.round((base+wknd)*0.35) }
-})
+export const dailySalesData = [
+  { date: '2/13', sales: 6_920_000, orders: 62, profit: 2_422_000 },
+  { date: '2/14', sales: 7_350_000, orders: 68, profit: 2_572_500 },
+  { date: '2/15', sales: 8_100_000, orders: 75, profit: 2_835_000 },
+  { date: '2/16', sales: 7_800_000, orders: 72, profit: 2_730_000 },
+  { date: '2/17', sales: 7_150_000, orders: 65, profit: 2_502_500 },
+  { date: '2/18', sales: 6_880_000, orders: 61, profit: 2_408_000 },
+  { date: '2/19', sales: 7_020_000, orders: 64, profit: 2_457_000 },
+  { date: '2/20', sales: 7_280_000, orders: 66, profit: 2_548_000 },
+  { date: '2/21', sales: 7_450_000, orders: 69, profit: 2_607_500 },
+  { date: '2/22', sales: 8_200_000, orders: 76, profit: 2_870_000 },
+  { date: '2/23', sales: 7_900_000, orders: 73, profit: 2_765_000 },
+  { date: '2/24', sales: 7_100_000, orders: 64, profit: 2_485_000 },
+  { date: '2/25', sales: 6_950_000, orders: 63, profit: 2_432_500 },
+  { date: '2/26', sales: 7_380_000, orders: 67, profit: 2_583_000 },
+  { date: '2/27', sales: 7_520_000, orders: 70, profit: 2_632_000 },
+  { date: '2/28', sales: 7_650_000, orders: 71, profit: 2_677_500 },
+  { date: '3/1', sales: 8_300_000, orders: 77, profit: 2_905_000 },
+  { date: '3/2', sales: 8_050_000, orders: 74, profit: 2_817_500 },
+  { date: '3/3', sales: 7_200_000, orders: 65, profit: 2_520_000 },
+  { date: '3/4', sales: 6_900_000, orders: 62, profit: 2_415_000 },
+  { date: '3/5', sales: 7_130_000, orders: 65, profit: 2_495_500 },
+  { date: '3/6', sales: 7_350_000, orders: 67, profit: 2_572_500 },
+  { date: '3/7', sales: 7_480_000, orders: 69, profit: 2_618_000 },
+  { date: '3/8', sales: 6_850_000, orders: 62, profit: 2_397_500 },
+  { date: '3/9', sales: 7_320_000, orders: 66, profit: 2_562_000 },
+  { date: '3/10', sales: 7_150_000, orders: 65, profit: 2_502_500 },
+  { date: '3/11', sales: 6_980_000, orders: 63, profit: 2_443_000 },
+  { date: '3/12', sales: 7_420_000, orders: 68, profit: 2_597_000 },
+  { date: '3/13', sales: 7_580_000, orders: 70, profit: 2_653_000 },
+  { date: '3/14', sales: 7_270_000, orders: 66, profit: 2_544_500 },
+]
 export const weeklySalesData = [
-  { week: '1주차', sales: 46_500_000, orders: 385, growth: 0 },
-  { week: '2주차', sales: 49_200_000, orders: 412, growth: 5.8 },
-  { week: '3주차', sales: 51_800_000, orders: 438, growth: 5.3 },
-  { week: '4주차', sales: 48_600_000, orders: 405, growth: -6.2 },
+  { week: '1주차', sales: 50_900_000, orders: 465, growth: 0 },
+  { week: '2주차', sales: 51_200_000, orders: 472, growth: 0.6 },
+  { week: '3주차', sales: 50_580_000, orders: 460, growth: -1.2 },
+  { week: '4주차', sales: 50_770_000, orders: 462, growth: 0.4 },
 ]
 export const monthlySalesData = [
-  { month: '2025.10', sales: 168_000_000, profit: 58_800_000 },
-  { month: '2025.11', sales: 185_000_000, profit: 64_750_000 },
-  { month: '2025.12', sales: 225_000_000, profit: 78_750_000 },
-  { month: '2026.01', sales: 178_000_000, profit: 62_300_000 },
-  { month: '2026.02', sales: 195_000_000, profit: 68_250_000 },
-  { month: '2026.03', sales: 210_000_000, profit: 73_500_000 },
+  { month: '2025.10', sales: 205_000_000, profit: 71_750_000 },
+  { month: '2025.11', sales: 210_000_000, profit: 73_500_000 },
+  { month: '2025.12', sales: 228_000_000, profit: 79_800_000 },
+  { month: '2026.01', sales: 198_000_000, profit: 69_300_000 },
+  { month: '2026.02', sales: 208_000_000, profit: 72_800_000 },
+  { month: '2026.03', sales: 218_000_000, profit: 76_300_000 },
 ]
 export const productSalesShare = [
   { name: 'Edge V2', value: 35, amount: 73_500_000, color: '#2A3B32' },
@@ -113,9 +142,9 @@ export const colorDetailData = [
   { name: '화이트', pct: 7, hex: '#F0F0F0' }, { name: '와인', pct: 3, hex: '#722F37' },
 ]
 export const salesForecastData = Array.from({ length: 30 }, (_, i) => {
-  const d = new Date(2026, 2, 10 + i)
-  const base = 7_000_000 + Math.sin(i/5)*1_200_000 + i*50_000
-  return { date: `${d.getMonth()+1}/${d.getDate()}`, predicted: Math.round(base), upper: Math.round(base*1.15), lower: Math.round(base*0.85) }
+  const d = new Date(2026, 2, 15 + i)
+  const base = 7_270_000 + Math.sin(i/5)*800_000 + i*30_000
+  return { date: `${d.getMonth()+1}/${d.getDate()}`, predicted: Math.round(base), upper: Math.round(base*1.12), lower: Math.round(base*0.88) }
 })
 export const competitorData = [
   { name: 'D.CURVIN', sales: 210, share: 12.5, rank: 3, color: '#2A3B32', highlight: true },
